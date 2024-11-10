@@ -1,10 +1,10 @@
 {
-  "name": "tournament-management",
+  "name": "soccer-tournament-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
@@ -13,9 +13,9 @@
     "vue-router": "^4.2.5",
     "pinia": "^2.1.7",
     "axios": "^1.6.2",
-    "@vueuse/core": "^10.7.0",
-    "primevue": "^3.45.0",
-    "primeicons": "^6.0.1"
+    "primevue": "^3.42.0",
+    "primeicons": "^6.0.1",
+    "@vueuse/core": "^10.7.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.3",

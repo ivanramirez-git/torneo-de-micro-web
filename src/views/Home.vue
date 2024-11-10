@@ -1,47 +1,38 @@
 <template>
-  <div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-6">Tournament Management System</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <router-link v-for="item in menuItems" :key="item.path" :to="item.path"
-        class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-        <h2 class="text-xl font-semibold mb-2">{{ item.name }}</h2>
-        <p class="text-gray-600">{{ item.description }}</p>
-      </router-link>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-center mb-8">Torneos de Fútbol</h1>
+    <div v-if="loading" class="text-center">
+      <p>Cargando torneos...</p>
+    </div>
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="tournament in tournaments" :key="tournament.id"
+        class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <h2 class="text-2xl font-bold mb-4" :style="{ color: tournament.color }">
+          {{ tournament.nombre }}
+        </h2>
+        <div class="mt-4">
+          <p class="text-gray-600">Creado: {{ new Date(tournament.createdAt).toLocaleDateString() }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const menuItems = [
-  {
-    name: 'Tournaments',
-    path: '/tournaments',
-    description: 'Create and manage tournaments'
-  },
-  {
-    name: 'Teams',
-    path: '/teams',
-    description: 'Manage teams and their information'
-  },
-  {
-    name: 'Players',
-    path: '/players',
-    description: 'Handle player registrations and details'
-  },
-  {
-    name: 'Schedule',
-    path: '/schedule',
-    description: 'View and manage tournament schedules'
-  },
-  {
-    name: 'Groups',
-    path: '/groups',
-    description: 'Organize teams into groups'
-  },
-  {
-    name: 'Matches',
-    path: '/matches',
-    description: 'Track match results and statistics'
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const tournaments = ref([]);
+const loading = ref(true);
+
+onMounted(async () => {
+  try {
+    const response = await axios.get('https://api-micro.freeloz.com/torneos');
+    tournaments.value = response.data;
+  } catch (error) {
+    console.error('Error fetching tournaments:', error);
+  } finally {
+    loading.value = false;
   }
-]
+});
 </script>
