@@ -9,7 +9,7 @@
           </h1>
           <StatusBadge v-if="match" :match="match" />
         </div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p class="text-gray-600">
@@ -33,29 +33,20 @@
       <!-- Match Controls -->
       <div class="bg-white shadow rounded-lg p-6 mb-6">
         <h2 class="text-xl font-semibold mb-4">Control del Partido</h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Time Controls -->
           <div class="space-y-4">
             <h3 class="text-lg font-medium">Tiempos de Juego</h3>
-            
+
             <!-- First Half -->
             <div class="flex items-center justify-between">
               <span>Primer Tiempo</span>
               <div class="space-x-2">
-                <Button 
-                  v-if="!match?.horaInicioPrimerTiempo"
-                  label="Iniciar" 
-                  icon="pi pi-play"
-                  @click="startFirstHalf"
-                />
-                <Button 
-                  v-if="match?.horaInicioPrimerTiempo && !match?.horaFinPrimerTiempo"
-                  label="Finalizar" 
-                  icon="pi pi-stop"
-                  severity="danger"
-                  @click="endFirstHalf"
-                />
+                <Button v-if="!match?.horaInicioPrimerTiempo" label="Iniciar" icon="pi pi-play"
+                  @click="startFirstHalf" />
+                <Button v-if="match?.horaInicioPrimerTiempo && !match?.horaFinPrimerTiempo" label="Finalizar"
+                  icon="pi pi-stop" severity="danger" @click="endFirstHalf" />
               </div>
             </div>
 
@@ -63,19 +54,9 @@
             <div class="flex items-center justify-between">
               <span>Segundo Tiempo</span>
               <div class="space-x-2">
-                <Button 
-                  v-if="canStartSecondHalf"
-                  label="Iniciar" 
-                  icon="pi pi-play"
-                  @click="startSecondHalf"
-                />
-                <Button 
-                  v-if="match?.horaInicioSegundoTiempo && !match?.horaFinSegundoTiempo"
-                  label="Finalizar" 
-                  icon="pi pi-stop"
-                  severity="danger"
-                  @click="endSecondHalf"
-                />
+                <Button v-if="canStartSecondHalf" label="Iniciar" icon="pi pi-play" @click="startSecondHalf" />
+                <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinSegundoTiempo" label="Finalizar"
+                  icon="pi pi-stop" severity="danger" @click="endSecondHalf" />
               </div>
             </div>
 
@@ -83,19 +64,9 @@
             <div v-if="showExtraTime" class="flex items-center justify-between">
               <span>Tiempo Extra 1</span>
               <div class="space-x-2">
-                <Button 
-                  v-if="canStartExtraTime1"
-                  label="Iniciar" 
-                  icon="pi pi-play"
-                  @click="startExtraTime1"
-                />
-                <Button 
-                  v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1"
-                  label="Finalizar" 
-                  icon="pi pi-stop"
-                  severity="danger"
-                  @click="endExtraTime1"
-                />
+                <Button v-if="canStartExtraTime1" label="Iniciar" icon="pi pi-play" @click="startExtraTime1" />
+                <Button v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1" label="Finalizar"
+                  icon="pi pi-stop" severity="danger" @click="endExtraTime1" />
               </div>
             </div>
 
@@ -103,19 +74,9 @@
             <div v-if="showExtraTime" class="flex items-center justify-between">
               <span>Tiempo Extra 2</span>
               <div class="space-x-2">
-                <Button 
-                  v-if="canStartExtraTime2"
-                  label="Iniciar" 
-                  icon="pi pi-play"
-                  @click="startExtraTime2"
-                />
-                <Button 
-                  v-if="match?.horaInicioTiempoExtra2 && !match?.horaFinTiempoExtra2"
-                  label="Finalizar" 
-                  icon="pi pi-stop"
-                  severity="danger"
-                  @click="endExtraTime2"
-                />
+                <Button v-if="canStartExtraTime2" label="Iniciar" icon="pi pi-play" @click="startExtraTime2" />
+                <Button v-if="match?.horaInicioTiempoExtra2 && !match?.horaFinTiempoExtra2" label="Finalizar"
+                  icon="pi pi-stop" severity="danger" @click="endExtraTime2" />
               </div>
             </div>
 
@@ -123,19 +84,9 @@
             <div v-if="showPenalties" class="flex items-center justify-between">
               <span>Penales</span>
               <div class="space-x-2">
-                <Button 
-                  v-if="canStartPenalties"
-                  label="Iniciar" 
-                  icon="pi pi-play"
-                  @click="startPenalties"
-                />
-                <Button 
-                  v-if="match?.horaInicioPenales && !match?.horaFinPenales"
-                  label="Finalizar" 
-                  icon="pi pi-stop"
-                  severity="danger"
-                  @click="endPenalties"
-                />
+                <Button v-if="canStartPenalties" label="Iniciar" icon="pi pi-play" @click="startPenalties" />
+                <Button v-if="match?.horaInicioPenales && !match?.horaFinPenales" label="Finalizar" icon="pi pi-stop"
+                  severity="danger" @click="endPenalties" />
               </div>
             </div>
           </div>
@@ -143,39 +94,19 @@
           <!-- Match Actions -->
           <div class="space-y-4">
             <h3 class="text-lg font-medium">Acciones</h3>
-            
-            <div class="space-y-2">
-              <Button 
-                label="Solicitar Tiempo" 
-                icon="pi pi-clock"
-                class="w-full"
-                @click="requestTime"
-                :disabled="!isMatchInProgress"
-              />
-              
-              <Button 
-                label="Registrar Gol" 
-                icon="pi pi-star"
-                class="w-full"
-                @click="showGoalDialog"
-                :disabled="!isMatchInProgress"
-              />
-              
-              <Button 
-                label="Registrar Tarjeta" 
-                icon="pi pi-ticket"
-                class="w-full"
-                @click="showCardDialog"
-                :disabled="!isMatchInProgress"
-              />
 
-              <Button 
-                v-if="showPenalties && match?.horaInicioPenales"
-                label="Registrar Penal" 
-                icon="pi pi-flag"
-                class="w-full"
-                @click="showPenaltyDialog"
-              />
+            <div class="space-y-2">
+              <Button label="Solicitar Tiempo" icon="pi pi-clock" class="w-full" @click="requestTime"
+                :disabled="!isMatchInProgress" />
+
+              <Button label="Registrar Gol" icon="pi pi-star" class="w-full" @click="showGoalDialog"
+                :disabled="!isMatchInProgress" />
+
+              <Button label="Registrar Tarjeta" icon="pi pi-ticket" class="w-full" @click="showCardDialog"
+                :disabled="!isMatchInProgress" />
+
+              <Button v-if="showPenalties && match?.horaInicioPenales" label="Registrar Penal" icon="pi pi-flag"
+                class="w-full" @click="showPenaltyDialog" />
             </div>
           </div>
         </div>
@@ -257,28 +188,15 @@
       <div class="space-y-4">
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Equipo</label>
-          <Dropdown
-            v-model="goalForm.teamId"
-            :options="[
-              { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
-              { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
-            ]"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Seleccione un equipo"
-            class="w-full"
-          />
+          <Dropdown v-model="goalForm.teamId" :options="[
+            { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
+            { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
+          ]" optionLabel="name" optionValue="id" placeholder="Seleccione un equipo" class="w-full" />
         </div>
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Jugador</label>
-          <Dropdown
-            v-model="goalForm.playerId"
-            :options="getTeamPlayers(goalForm.teamId)"
-            optionLabel="nombre"
-            optionValue="id"
-            placeholder="Seleccione un jugador"
-            class="w-full"
-          />
+          <Dropdown v-model="goalForm.playerId" :options="getTeamPlayers(goalForm.teamId)" optionLabel="nombre"
+            optionValue="id" placeholder="Seleccione un jugador" class="w-full" />
         </div>
       </div>
       <template #footer>
@@ -291,43 +209,23 @@
       <div class="space-y-4">
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Equipo</label>
-          <Dropdown
-            v-model="cardForm.teamId"
-            :options="[
-              { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
-              { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
-            ]"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Seleccione un equipo"
-            class="w-full"
-          />
+          <Dropdown v-model="cardForm.teamId" :options="[
+            { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
+            { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
+          ]" optionLabel="name" optionValue="id" placeholder="Seleccione un equipo" class="w-full" />
         </div>
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Jugador</label>
-          <Dropdown
-            v-model="cardForm.playerId"
-            :options="getTeamPlayers(cardForm.teamId)"
-            optionLabel="nombre"
-            optionValue="id"
-            placeholder="Seleccione un jugador"
-            class="w-full"
-          />
+          <Dropdown v-model="cardForm.playerId" :options="getTeamPlayers(cardForm.teamId)" optionLabel="nombre"
+            optionValue="id" placeholder="Seleccione un jugador" class="w-full" />
         </div>
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Tipo de Tarjeta</label>
-          <Dropdown
-            v-model="cardForm.type"
-            :options="[
-              { value: 'yellow', label: 'Amarilla' },
-              { value: 'blue', label: 'Azul' },
-              { value: 'red', label: 'Roja' }
-            ]"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Seleccione el tipo"
-            class="w-full"
-          />
+          <Dropdown v-model="cardForm.type" :options="[
+            { value: 'yellow', label: 'Amarilla' },
+            { value: 'blue', label: 'Azul' },
+            { value: 'red', label: 'Roja' }
+          ]" optionLabel="label" optionValue="value" placeholder="Seleccione el tipo" class="w-full" />
         </div>
       </div>
       <template #footer>
@@ -340,46 +238,25 @@
       <div class="space-y-4">
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Equipo</label>
-          <Dropdown
-            v-model="penaltyForm.teamId"
-            :options="[
-              { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
-              { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
-            ]"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Seleccione un equipo"
-            class="w-full"
-          />
+          <Dropdown v-model="penaltyForm.teamId" :options="[
+            { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
+            { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
+          ]" optionLabel="name" optionValue="id" placeholder="Seleccione un equipo" class="w-full" />
         </div>
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Jugador</label>
-          <Dropdown
-            v-model="penaltyForm.playerId"
-            :options="getTeamPlayers(penaltyForm.teamId)"
-            optionLabel="nombre"
-            optionValue="id"
-            placeholder="Seleccione un jugador"
-            class="w-full"
-          />
+          <Dropdown v-model="penaltyForm.playerId" :options="getTeamPlayers(penaltyForm.teamId)" optionLabel="nombre"
+            optionValue="id" placeholder="Seleccione un jugador" class="w-full" />
         </div>
         <div class="p-field">
           <label class="block text-sm font-medium text-gray-700">Resultado</label>
           <div class="flex gap-4">
             <div class="flex items-center">
-              <RadioButton 
-                v-model="penaltyForm.gol" 
-                :value="true"
-                inputId="gol-si"
-              />
+              <RadioButton v-model="penaltyForm.gol" :value="true" inputId="gol-si" />
               <label for="gol-si" class="ml-2">Gol</label>
             </div>
             <div class="flex items-center">
-              <RadioButton 
-                v-model="penaltyForm.gol" 
-                :value="false"
-                inputId="gol-no"
-              />
+              <RadioButton v-model="penaltyForm.gol" :value="false" inputId="gol-no" />
               <label for="gol-no" class="ml-2">Fallado</label>
             </div>
           </div>
@@ -619,17 +496,17 @@ const endSecondHalf = async () => {
     const updates: any = {
       horaFinSegundoTiempo: new Date()
     };
-    
+
     // If match allows ties and scores are equal, end the match
     if (match.value.permiteEmpates) {
       const localStats = getTeamStats(match.value.equipoLocalId);
       const visitorStats = getTeamStats(match.value.equipoVisitanteId);
-      
+
       if (localStats?.goles === visitorStats?.goles) {
         updates.horaFinPartido = new Date();
       }
     }
-    
+
     await api.patch(`/partidos/${match.value.id}`, updates);
     await loadMatch();
     toast.add({
@@ -811,6 +688,8 @@ const showGoalDialog = () => {
 };
 
 const saveGoal = async () => {
+  console.log('Adding goal 2:');
+
   try {
     await api.post(`/partidos/${match.value.id}/estadistica-partidos`, {
       equipoId: goalForm.value.teamId,
@@ -896,7 +775,7 @@ const savePenalty = async () => {
       jugadorId: penaltyForm.value.playerId,
       gol: penaltyForm.value.gol
     });
-    
+
     if (penaltyForm.value.gol) {
       await api.post(`/partidos/${match.value.id}/estadistica-partidos`, {
         equipoId: penaltyForm.value.teamId,
@@ -904,7 +783,7 @@ const savePenalty = async () => {
         goles: 1
       });
     }
-    
+
     penaltyDialog.value = false;
     await loadMatch();
     toast.add({

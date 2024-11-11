@@ -14,7 +14,7 @@ const props = defineProps<{
 }>();
 
 const seconds = ref(0);
-const timer = ref<number | null>(null);
+let timer: number | null = null;
 
 const currentPeriodText = computed(() => {
     switch (props.period) {
@@ -34,31 +34,27 @@ const formattedTime = computed(() => {
 });
 
 const startTimer = () => {
+    if (timer) {
+        clearInterval(timer);
+    }
+
     if (props.startTime && props.isActive) {
         const startTimeMs = new Date(props.startTime).getTime();
         const currentTimeMs = Date.now();
         seconds.value = Math.floor((currentTimeMs - startTimeMs) / 1000);
 
-        timer.value = window.setInterval(() => {
+        timer = window.setInterval(() => {
             seconds.value++;
         }, 1000);
     }
 };
 
 const stopTimer = () => {
-    if (timer.value) {
-        clearInterval(timer.value);
-        timer.value = null;
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
     }
 };
-
-onMounted(() => {
-    startTimer();
-});
-
-onUnmounted(() => {
-    stopTimer();
-});
 
 watch(() => props.startTime, () => {
     stopTimer();
@@ -71,5 +67,13 @@ watch(() => props.isActive, (newValue) => {
     } else {
         stopTimer();
     }
+});
+
+onMounted(() => {
+    startTimer();
+});
+
+onUnmounted(() => {
+    stopTimer();
 });
 </script>

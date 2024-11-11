@@ -16,6 +16,13 @@ export interface Player extends BaseEntity {
   equipoId: string;
 }
 
+export interface SolicitudTiempo {
+  equipoId: string;
+  partidoId: string;
+  periodo: number;
+  minuto: Date;
+}
+
 export interface Tournament extends BaseEntity {
   nombre: string;
   color: string;
@@ -58,11 +65,13 @@ export interface Match extends BaseEntity {
   horaFinTiempoExtra2?: Date;
   horaInicioPenales?: Date;
   horaFinPenales?: Date;
+  mvpId?: string;
   horaFinPartido?: Date;
   equipoLocalId: string;
   equipoVisitanteId: string;
   grupoId: string;
   lugarId: string;
+  lugar?: Venue;
 }
 
 export interface MatchStatistics extends BaseEntity {
@@ -73,6 +82,8 @@ export interface MatchStatistics extends BaseEntity {
   tarjetasAmarillas: number;
   tarjetasRojas: number;
   partidoId: string;
+  jugadorId: string;
+  equipoId: string;
 }
 
 export interface TimeRequest extends BaseEntity {

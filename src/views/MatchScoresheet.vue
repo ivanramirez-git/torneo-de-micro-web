@@ -254,6 +254,7 @@ const getPlayerStats = (playerId: string) => {
 };
 
 const addGoal = async (player) => {
+  console.log('Adding goal 1:', player);
   try {
     await api.post(`/partidos/${match.value.id}/estadistica-partidos`, {
       equipoId: player.equipoId,
