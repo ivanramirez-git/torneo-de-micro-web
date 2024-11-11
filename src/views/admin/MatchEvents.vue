@@ -1,8 +1,12 @@
 <template>
     <div class="min-h-screen bg-gray-100">
         <div class="max-w-7xl mx-auto py-6 px-4">
+
             <!-- Header -->
-            <MatchHeader :match="match" :teams="teams" />
+            <MatchHeader :match="match" :teams="teams" :stats="playerStats" />
+
+            <!-- Match Summary -->
+            <MatchSummary :match="match" :teams="teams" :stats="playerStats" />
 
             <!-- Match Controls -->
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -50,20 +54,20 @@
             <!-- Teams -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Local Team -->
-                <TeamStats :team="getTeam(match?.equipoLocalId)" :players="getTeamPlayers(match?.equipoLocalId)"
-                    :stats="getTeamStats(match?.equipoLocalId)" :player-stats="playerStats"
-                    :time-requests="getTeamTimeRequests(match?.equipoLocalId)" :isActive="isMatchActive" @goal="addGoal"
-                    @foul="addFoul" @card="saveCard" @requestTime="requestTime" />
+                <TeamStats :match="match" :team="getTeam(match?.equipoLocalId)"
+                    :players="getTeamPlayers(match?.equipoLocalId)" :stats="getTeamStats(match?.equipoLocalId)"
+                    :player-stats="playerStats" :time-requests="getTeamTimeRequests(match?.equipoLocalId)"
+                    :isActive="isMatchActive" @goal="addGoal" @foul="addFoul" @card="saveCard"
+                    @requestTime="requestTime" />
 
                 <!-- Visitor Team -->
-                <TeamStats :team="getTeam(match?.equipoVisitanteId)" :players="getTeamPlayers(match?.equipoVisitanteId)"
-                    :stats="getTeamStats(match?.equipoVisitanteId)" :player-stats="playerStats"
-                    :time-requests="getTeamTimeRequests(match?.equipoVisitanteId)" :isActive="isMatchActive"
-                    @goal="addGoal" @foul="addFoul" @card="saveCard" @requestTime="requestTime" />
+                <TeamStats :match="match" :team="getTeam(match?.equipoVisitanteId)"
+                    :players="getTeamPlayers(match?.equipoVisitanteId)" :stats="getTeamStats(match?.equipoVisitanteId)"
+                    :player-stats="playerStats" :time-requests="getTeamTimeRequests(match?.equipoVisitanteId)"
+                    :isActive="isMatchActive" @goal="addGoal" @foul="addFoul" @card="saveCard"
+                    @requestTime="requestTime" />
             </div>
 
-            <!-- Match Summary -->
-            <MatchSummary :match="match" :teams="teams" :stats="playerStats" />
         </div>
 
         <!-- Dialogs -->
@@ -93,7 +97,6 @@ import QuickActions from '../../components/matches/QuickActions.vue';
 import TeamStats from '../../components/matches/TeamStats.vue';
 import MatchSummary from '../../components/matches/MatchSummary.vue';
 import EventDialogs from '../../components/matches/EventDialogs.vue';
-import MatchPeriodControls from '../../components/matches/MatchPeriodControls.vue';
 
 
 const route = useRoute();

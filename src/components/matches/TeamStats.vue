@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="text-4xl font-bold">
-                {{ stats?.goles || 0 }}
+                {{ totalTeamGoals }}
             </div>
         </div>
 
@@ -40,11 +40,11 @@
                 <tr v-for="player in players" :key="player.id" class="border-b hover:bg-gray-50">
                     <td class="py-2">{{ player.numero }}</td>
                     <td>{{ player.nombre }}</td>
-                    <td class="text-center">{{ getPlayerStats(player.id)?.goles || 0 }}</td>
-                    <td class="text-center">{{ getPlayerStats(player.id)?.faltas || 0 }}</td>
-                    <td class="text-center">{{ getPlayerStats(player.id)?.tarjetasAmarillas || 0 }}</td>
-                    <td class="text-center">{{ getPlayerStats(player.id)?.tarjetasAzules || 0 }}</td>
-                    <td class="text-center">{{ getPlayerStats(player.id)?.tarjetasRojas || 0 }}</td>
+                    <td class="text-center">{{ getPlayerStats(player.id).goles }}</td>
+                    <td class="text-center">{{ getPlayerStats(player.id).faltas }}</td>
+                    <td class="text-center">{{ getPlayerStats(player.id).tarjetasAmarillas }}</td>
+                    <td class="text-center">{{ getPlayerStats(player.id).tarjetasAzules }}</td>
+                    <td class="text-center">{{ getPlayerStats(player.id).tarjetasRojas }}</td>
                     <td>
                         <div class="flex justify-center gap-1">
                             <button class="p-1 rounded hover:bg-gray-100" @click="$emit('goal', { player, team })"
@@ -79,17 +79,19 @@
 </template>
 
 <script setup lang="ts">
-import type { Team, Player, MatchStatistics, SolicitudTiempo } from '../../interfaces';
+import { computed } from 'vue';
+import type { Team, Player, MatchStatistics, SolicitudTiempo, Match } from '../../interfaces';
 
-let props =
-    defineProps<{
-        team?: Team;
-        players: Player[];
-        stats?: MatchStatistics;
-        playerStats: MatchStatistics[];
-        timeRequests: SolicitudTiempo[];
-        isActive: boolean;
-    }>();
+let props = defineProps<{
+    match?: Match;
+    team?: Team;
+    players: Player[];
+    timeRequests: SolicitudTiempo[];
+    isActive: boolean;
+}>();
+
+console.log('match', props.match);
+console.log('team', props.team);
 
 defineEmits<{
     (e: 'goal', data: { player: Player; team: Team }): void;
@@ -98,9 +100,48 @@ defineEmits<{
     (e: 'requestTime', team: Team): void;
 }>();
 
-const getPlayerStats = (playerId: string): MatchStatistics | undefined => {
-    return props.playerStats.find(s => s.jugadorId === playerId);
+const getPlayerStats = (playerId: string): {
+    goles: number;
+    faltas: number;
+    tarjetasAmarillas: number;
+    tarjetasAzules: number;
+    tarjetasRojas: number;
+} => {
+    if (!props.match || !props.match.estadisticasPartido) {
+        return {
+            goles: 0,
+            faltas: 0,
+            tarjetasAmarillas: 0,
+            tarjetasAzules: 0,
+            tarjetasRojas: 0,
+        };
+    }
+
+    const stats = props.match.estadisticasPartido.filter(
+        (s) => s.jugadorId === playerId && s.equipoId === props.team?.id
+    );
+
+    const totalStats = stats.reduce(
+        (acc, stat) => {
+            return {
+                goles: acc.goles + (stat.goles || 0),
+                faltas: acc.faltas + (stat.faltas || 0),
+                tarjetasAmarillas: acc.tarjetasAmarillas + (stat.tarjetasAmarillas || 0),
+                tarjetasAzules: acc.tarjetasAzules + (stat.tarjetasAzules || 0),
+                tarjetasRojas: acc.tarjetasRojas + (stat.tarjetasRojas || 0),
+            };
+        },
+        { goles: 0, faltas: 0, tarjetasAmarillas: 0, tarjetasAzules: 0, tarjetasRojas: 0 }
+    );
+
+    return totalStats;
 };
 
+const totalTeamGoals = computed(() => {
+    if (!props.match || !props.match.estadisticasPartido || !props.team) return 0;
 
+    return props.match.estadisticasPartido
+        .filter((stat) => stat.equipoId === props.team?.id)
+        .reduce((acc, stat) => acc + (stat.goles || 0), 0);
+});
 </script>

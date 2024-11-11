@@ -72,6 +72,7 @@ export interface Match extends BaseEntity {
   grupoId: string;
   lugarId: string;
   lugar?: Venue;
+  estadisticasPartido? : MatchStatistics[];
 }
 
 export interface MatchStatistics extends BaseEntity {
