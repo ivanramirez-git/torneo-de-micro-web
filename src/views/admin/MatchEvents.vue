@@ -3,111 +3,98 @@
         <div class="max-w-7xl mx-auto py-6 px-4">
             <!-- Header -->
             <div class="text-center mb-6">
-                <h1 class="text-3xl font-bold">Gestión de Eventos del Partido</h1>
+                <h1 class="text-3xl font-bold">Planilla Oficial de Juego</h1>
                 <div class="mt-4 flex items-center justify-center gap-4">
-                    <div v-if="match" class="text-xl">
-                        {{ getTeamName(match.equipoLocalId) }} vs {{ getTeamName(match.equipoVisitanteId) }}
-                    </div>
+                    <Button v-if="!match?.horaFinPartido" label="Finalizar Partido" severity="danger" @click="endMatch"
+                        :disabled="!match?.mvpId" />
+                    <MatchTimer :startTime="getCurrentPeriodStartTime" :period="currentPeriod"
+                        :isActive="isMatchActive" />
+                </div>
+
+                <!-- MVP Selection -->
+                <div class="mt-4 max-w-md mx-auto">
+                    <h3 class="text-lg font-medium mb-2">🏆 MVP del Partido</h3>
+                    <Dropdown v-model="selectedMvp" :options="allPlayers" optionLabel="nombre" optionValue="id"
+                        placeholder="Seleccionar MVP" class="w-full" @change="updateMvp" />
+                </div>
+
+                <!-- Match Controls -->
+                <div v-if="!match?.horaFinPartido" class="mt-4 flex justify-center gap-4">
+                    <!-- First Half -->
+                    <Button v-if="!match?.horaInicioPrimerTiempo" label="Iniciar Primer Tiempo" icon="pi pi-play"
+                        @click="startFirstHalf" />
+                    <Button v-if="match?.horaInicioPrimerTiempo && !match?.horaFinPrimerTiempo"
+                        label="Finalizar Primer Tiempo" icon="pi pi-stop" severity="danger" @click="endFirstHalf" />
+
+                    <!-- Second Half -->
+                    <Button v-if="canStartSecondHalf" label="Iniciar Segundo Tiempo" icon="pi pi-play"
+                        @click="startSecondHalf" />
+                    <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinSegundoTiempo"
+                        label="Finalizar Segundo Tiempo" icon="pi pi-stop" severity="danger" @click="endSecondHalf" />
+
+                    <!-- Extra Time Controls (only if draws are not allowed) -->
+                    <template v-if="!allowsDraws">
+                        <!-- Extra Time 1 -->
+                        <Button v-if="canStartExtraTime1" label="Iniciar T.Extra 1" icon="pi pi-play"
+                            @click="startExtraTime1" />
+                        <Button v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1"
+                            label="Finalizar T.Extra 1" icon="pi pi-stop" severity="danger" @click="endExtraTime1" />
+
+                        <!-- Extra Time 2 -->
+                        <Button v-if="canStartExtraTime2" label="Iniciar T.Extra 2" icon="pi pi-play"
+                            @click="startExtraTime2" />
+                        <Button v-if="match?.horaInicioTiempoExtra2 && !match?.horaFinTiempoExtra2"
+                            label="Finalizar T.Extra 2" icon="pi pi-stop" severity="danger" @click="endExtraTime2" />
+
+                        <!-- Penalties -->
+                        <Button v-if="canStartPenalties" label="Iniciar Penales" icon="pi pi-play"
+                            @click="startPenalties" />
+                        <Button v-if="match?.horaInicioPenales && !match?.horaFinPenales" label="Finalizar Penales"
+                            icon="pi pi-stop" severity="danger" @click="endPenalties" />
+                    </template>
                 </div>
             </div>
 
-            <!-- Match Controls -->
-            <div class="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 class="text-xl font-semibold mb-4">Control del Partido</h2>
+            <!-- Teams -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Local Team -->
+                <TeamStats :team="getTeam(match?.equipoLocalId)" :players="getTeamPlayers(match?.equipoLocalId)"
+                    :stats="getTeamStats(match?.equipoLocalId)" :player-stats="playerStats" :is-active="isMatchActive"
+                    @goal="addGoal" @foul="addFoul" @card="showCardDialog" @request-time="requestTime" />
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Time Controls -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-medium">Tiempos de Juego</h3>
-
-                        <!-- First Half -->
-                        <div class="flex items-center justify-between">
-                            <span>Primer Tiempo</span>
-                            <div class="space-x-2">
-                                <Button v-if="!match?.horaInicioPrimerTiempo" label="Iniciar" icon="pi pi-play"
-                                    @click="startFirstHalf" />
-                                <Button v-if="match?.horaInicioPrimerTiempo && !match?.horaFinPrimerTiempo"
-                                    label="Finalizar" icon="pi pi-stop" severity="danger" @click="endFirstHalf" />
-                            </div>
-                        </div>
-
-                        <!-- Second Half -->
-                        <div class="flex items-center justify-between">
-                            <span>Segundo Tiempo</span>
-                            <div class="space-x-2">
-                                <Button v-if="canStartSecondHalf" label="Iniciar" icon="pi pi-play"
-                                    @click="startSecondHalf" />
-                                <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinSegundoTiempo"
-                                    label="Finalizar" icon="pi pi-stop" severity="danger" @click="endSecondHalf" />
-                            </div>
-                        </div>
-
-                        <!-- Extra Time 1 -->
-                        <div v-if="showExtraTime" class="flex items-center justify-between">
-                            <span>Tiempo Extra 1</span>
-                            <div class="space-x-2">
-                                <Button v-if="canStartExtraTime1" label="Iniciar" icon="pi pi-play"
-                                    @click="startExtraTime1" />
-                                <Button v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1"
-                                    label="Finalizar" icon="pi pi-stop" severity="danger" @click="endExtraTime1" />
-                            </div>
-                        </div>
-
-                        <!-- Extra Time 2 -->
-                        <div v-if="showExtraTime" class="flex items-center justify-between">
-                            <span>Tiempo Extra 2</span>
-                            <div class="space-x-2">
-                                <Button v-if="canStartExtraTime2" label="Iniciar" icon="pi pi-play"
-                                    @click="startExtraTime2" />
-                                <Button v-if="match?.horaInicioTiempoExtra2 && !match?.horaFinTiempoExtra2"
-                                    label="Finalizar" icon="pi pi-stop" severity="danger" @click="endExtraTime2" />
-                            </div>
-                        </div>
-
-                        <!-- Penalties -->
-                        <div v-if="showPenalties" class="flex items-center justify-between">
-                            <span>Penales</span>
-                            <div class="space-x-2">
-                                <Button v-if="canStartPenalties" label="Iniciar" icon="pi pi-play"
-                                    @click="startPenalties" />
-                                <Button v-if="match?.horaInicioPenales && !match?.horaFinPenales" label="Finalizar"
-                                    icon="pi pi-stop" severity="danger" @click="endPenalties" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Match Actions -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-medium">Acciones</h3>
-
-                        <div class="space-y-2">
-                            <Button label="Solicitar Tiempo" icon="pi pi-clock" class="w-full" @click="requestTime"
-                                :disabled="!isMatchActive" />
-
-                            <Button label="Registrar Gol" icon="pi pi-star" class="w-full" @click="showGoalDialog"
-                                :disabled="!isMatchActive" />
-
-                            <Button label="Registrar Tarjeta" icon="pi pi-ticket" class="w-full" @click="showCardDialog"
-                                :disabled="!isMatchActive" />
-
-                            <Button v-if="showPenalties && match?.horaInicioPenales" label="Registrar Penal"
-                                icon="pi pi-flag" class="w-full" @click="showPenaltyDialog" />
-                        </div>
-                    </div>
-                </div>
+                <!-- Visitor Team -->
+                <TeamStats :team="getTeam(match?.equipoVisitanteId)" :players="getTeamPlayers(match?.equipoVisitanteId)"
+                    :stats="getTeamStats(match?.equipoVisitanteId)" :player-stats="playerStats"
+                    :is-active="isMatchActive" @goal="addGoal" @foul="addFoul" @card="showCardDialog"
+                    @request-time="requestTime" />
             </div>
 
             <!-- Match Summary -->
             <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
                 <h3 class="text-xl font-bold mb-4">Resumen del Partido</h3>
                 <div class="text-center text-2xl font-bold">
-                    {{ getTeamName(match?.equipoLocalId) }} {{ getTeamStats(match?.equipoLocalId)?.goles || 0 }} -
-                    {{ getTeamStats(match?.equipoVisitanteId)?.goles || 0 }} {{ getTeamName(match?.equipoVisitanteId) }}
+                    {{ getTeam(match?.equipoLocalId)?.nombre }} {{ getTeamStats(match?.equipoLocalId)?.goles || 0 }} -
+                    {{ getTeamStats(match?.equipoVisitanteId)?.goles || 0 }} {{
+                        getTeam(match?.equipoVisitanteId)?.nombre }}
                 </div>
             </div>
         </div>
 
         <!-- Dialogs -->
+        <Dialog v-model:visible="cardDialog" header="Asignar Tarjeta" modal>
+            <div class="space-y-4">
+                <div class="p-field">
+                    <label class="block text-sm font-medium text-gray-700">Tipo de Tarjeta</label>
+                    <div class="mt-2 space-x-4">
+                        <Button label="Amarilla" severity="warning" @click="assignCard('yellow')" />
+                        <Button label="Azul" severity="info" @click="assignCard('blue')" />
+                        <Button label="Roja" severity="danger" @click="assignCard('red')" />
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+
+        <!-- Time Request Dialog -->
         <Dialog v-model:visible="timeRequestDialog" header="Solicitud de Tiempo" modal>
             <div class="space-y-4">
                 <div class="p-field">
@@ -116,93 +103,8 @@
                 </div>
             </div>
             <template #footer>
-                <Button label="Cancelar" icon="pi pi-times" @click="timeRequestDialog = false" class="p-button-text" />
+                <Button label="Cancelar" icon="pi pi-times" @click="closeTimeRequestDialog" class="p-button-text" />
                 <Button label="Guardar" icon="pi pi-check" @click="saveTimeRequest" autofocus />
-            </template>
-        </Dialog>
-
-        <Dialog v-model:visible="goalDialog" header="Registrar Gol" modal>
-            <div class="space-y-4">
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Equipo</label>
-                    <Dropdown v-model="goalForm.teamId" :options="[
-                        { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
-                        { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
-                    ]" optionLabel="name" optionValue="id" placeholder="Seleccione un equipo" class="w-full" />
-                </div>
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Jugador</label>
-                    <Dropdown v-model="goalForm.playerId" :options="getTeamPlayers(goalForm.teamId)"
-                        optionLabel="nombre" optionValue="id" placeholder="Seleccione un jugador" class="w-full" />
-                </div>
-            </div>
-            <template #footer>
-                <Button label="Cancelar" icon="pi pi-times" @click="goalDialog = false" class="p-button-text" />
-                <Button label="Guardar" icon="pi pi-check" @click="saveGoal" autofocus />
-            </template>
-        </Dialog>
-
-        <Dialog v-model:visible="cardDialog" header="Registrar Tarjeta" modal>
-            <div class="space-y-4">
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Equipo</label>
-                    <Dropdown v-model="cardForm.teamId" :options="[
-                        { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
-                        { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
-                    ]" optionLabel="name" optionValue="id" placeholder="Seleccione un equipo" class="w-full" />
-                </div>
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Jugador</label>
-                    <Dropdown v-model="cardForm.playerId" :options="getTeamPlayers(cardForm.teamId)"
-                        optionLabel="nombre" optionValue="id" placeholder="Seleccione un jugador" ```vue
-                        class="w-full" />
-                </div>
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Tipo de Tarjeta</label>
-                    <Dropdown v-model="cardForm.type" :options="[
-                        { value: 'yellow', label: 'Amarilla' },
-                        { value: 'blue', label: 'Azul' },
-                        { value: 'red', label: 'Roja' }
-                    ]" optionLabel="label" optionValue="value" placeholder="Seleccione el tipo" class="w-full" />
-                </div>
-            </div>
-            <template #footer>
-                <Button label="Cancelar" icon="pi pi-times" @click="cardDialog = false" class="p-button-text" />
-                <Button label="Guardar" icon="pi pi-check" @click="saveCard" autofocus />
-            </template>
-        </Dialog>
-
-        <Dialog v-model:visible="penaltyDialog" header="Registrar Penal" modal>
-            <div class="space-y-4">
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Equipo</label>
-                    <Dropdown v-model="penaltyForm.teamId" :options="[
-                        { id: match?.equipoLocalId, name: getTeamName(match?.equipoLocalId) },
-                        { id: match?.equipoVisitanteId, name: getTeamName(match?.equipoVisitanteId) }
-                    ]" optionLabel="name" optionValue="id" placeholder="Seleccione un equipo" class="w-full" />
-                </div>
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Jugador</label>
-                    <Dropdown v-model="penaltyForm.playerId" :options="getTeamPlayers(penaltyForm.teamId)"
-                        optionLabel="nombre" optionValue="id" placeholder="Seleccione un jugador" class="w-full" />
-                </div>
-                <div class="p-field">
-                    <label class="block text-sm font-medium text-gray-700">Resultado</label>
-                    <div class="flex gap-4">
-                        <div class="flex items-center">
-                            <RadioButton v-model="penaltyForm.gol" :value="true" inputId="gol-si" />
-                            <label for="gol-si" class="ml-2">Gol</label>
-                        </div>
-                        <div class="flex items-center">
-                            <RadioButton v-model="penaltyForm.gol" :value="false" inputId="gol-no" />
-                            <label for="gol-no" class="ml-2">Fallado</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <template #footer>
-                <Button label="Cancelar" icon="pi pi-times" @click="penaltyDialog = false" class="p-button-text" />
-                <Button label="Guardar" icon="pi pi-check" @click="savePenalty" autofocus />
             </template>
         </Dialog>
 
@@ -211,9 +113,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import type { Match, Team, Player } from '../../interfaces';
 import api from '../../stores/api';
 
 // Components
@@ -221,74 +124,84 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
-import RadioButton from 'primevue/radiobutton';
 import Toast from 'primevue/toast';
+import TeamStats from '../../components/matches/TeamStats.vue';
+import MatchTimer from '../../components/matches/MatchTimer.vue';
 
 const route = useRoute();
 const toast = useToast();
 
 // State
-const match = ref(null);
-const teams = ref([]);
-const players = ref([]);
+const match = ref<Match | null>(null);
+const teams = ref<Team[]>([]);
+const players = ref<Player[]>([]);
+const playerStats = ref([]);
 const loading = ref(true);
+const selectedMvp = ref<string | null>(null);
 
 // Dialog states
-const timeRequestDialog = ref(false);
-const goalDialog = ref(false);
 const cardDialog = ref(false);
-const penaltyDialog = ref(false);
+const timeRequestDialog = ref(false);
+const selectedPlayer = ref<any>(null);
+const selectedTeam = ref<Team | null>(null);
 
-// Form states
 const timeRequestForm = ref({
-    periodo: 1
+    periodo: 1,
+    equipoId: '',
+    partidoId: ''
 });
 
-const goalForm = ref({
-    teamId: '',
-    playerId: ''
-});
-
-const cardForm = ref({
-    teamId: '',
-    playerId: '',
-    type: ''
-});
-
-const penaltyForm = ref({
-    teamId: '',
-    playerId: '',
-    gol: true
-});
-
-// Computed properties
+// Computed
 const isMatchActive = computed(() => {
     return match.value?.horaInicioPrimerTiempo && !match.value?.horaFinPartido;
+});
+
+const allowsDraws = computed(() => {
+    return match.value?.grupo?.faseTorneo?.permiteEmpates ?? false;
+});
+
+const currentPeriod = computed(() => {
+    if (!match.value) return '';
+
+    if (match.value.horaInicioPenales) return 'penalties';
+    if (match.value.horaInicioTiempoExtra2) return 'extra2';
+    if (match.value.horaInicioTiempoExtra1) return 'extra1';
+    if (match.value.horaInicioSegundoTiempo) return 'second';
+    if (match.value.horaInicioPrimerTiempo) return 'first';
+
+    return '';
+});
+
+const getCurrentPeriodStartTime = computed(() => {
+    if (!match.value) return undefined;
+
+    if (match.value.horaInicioPenales) return match.value.horaInicioPenales;
+    if (match.value.horaInicioTiempoExtra2) return match.value.horaInicioTiempoExtra2;
+    if (match.value.horaInicioTiempoExtra1) return match.value.horaInicioTiempoExtra1;
+    if (match.value.horaInicioSegundoTiempo) return match.value.horaInicioSegundoTiempo;
+    if (match.value.horaInicioPrimerTiempo) return match.value.horaInicioPrimerTiempo;
+
+    return undefined;
 });
 
 const canStartSecondHalf = computed(() => {
     return match.value?.horaFinPrimerTiempo && !match.value?.horaInicioSegundoTiempo;
 });
 
-const showExtraTime = computed(() => {
-    return !match.value?.permiteEmpates;
-});
-
 const canStartExtraTime1 = computed(() => {
+    if (allowsDraws.value) return false;
     return match.value?.horaFinSegundoTiempo && !match.value?.horaInicioTiempoExtra1;
 });
 
 const canStartExtraTime2 = computed(() => {
+    if (allowsDraws.value) return false;
     return match.value?.horaFinTiempoExtra1 && !match.value?.horaInicioTiempoExtra2;
 });
 
-const showPenalties = computed(() => {
-    return !match.value?.permiteEmpates;
-});
-
 const canStartPenalties = computed(() => {
+    if (allowsDraws.value) return false;
     if (match.value?.horaFinSegundoTiempo) {
-        if (showExtraTime.value) {
+        if (!allowsDraws.value) {
             return match.value?.horaFinTiempoExtra2 && !match.value?.horaInicioPenales;
         }
         return !match.value?.horaInicioPenales;
@@ -296,22 +209,49 @@ const canStartPenalties = computed(() => {
     return false;
 });
 
+const allPlayers = computed(() => {
+    return players.value.filter(p =>
+        p.equipoId === match.value?.equipoLocalId ||
+        p.equipoId === match.value?.equipoVisitanteId
+    );
+});
+
 // Methods
 const loadMatch = async () => {
     try {
         const response = await api.get(`/partidos/${route.params.id}`, {
             params: {
-                filter: {
+                filter: JSON.stringify({
                     include: [
-                        'lugar',
-                        'estadisticasPartido',
-                        'solicitudesTiempo',
-                        'penales'
+                        {
+                            relation: "grupo",
+                            scope: {
+                                include: [
+                                    {
+                                        relation: "faseTorneo"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            relation: "lugar"
+                        },
+                        {
+                            relation: "estadisticasPartido"
+                        },
+                        {
+                            relation: "solicitudesTiempo"
+                        },
+                        {
+                            relation: "penales"
+                        }
                     ]
-                }
+                })
             }
         });
+
         match.value = response.data;
+        selectedMvp.value = match.value.mvpId || null;
     } catch (error) {
         console.error('Error loading match:', error);
         toast.add({
@@ -343,27 +283,25 @@ const loadPlayers = async () => {
     }
 };
 
-const getTeam = (teamId: string) => {
+const getTeam = (teamId?: string): Team | undefined => {
+    if (!teamId) return undefined;
     return teams.value.find(t => t.id === teamId);
 };
 
-const getTeamName = (teamId: string) => {
-    const team = getTeam(teamId);
-    return team ? team.nombre : 'Equipo no encontrado';
-};
-
-const getTeamPlayers = (teamId: string) => {
+const getTeamPlayers = (teamId?: string): Player[] => {
+    if (!teamId) return [];
     return players.value.filter(p => p.equipoId === teamId);
 };
 
-const getTeamStats = (teamId: string) => {
+const getTeamStats = (teamId?: string): any => {
+    if (!teamId) return undefined;
     return match.value?.estadisticasPartido?.find(s => s.equipoId === teamId);
 };
 
 // Match period controls
 const startFirstHalf = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaInicioPrimerTiempo: new Date()
         });
         await loadMatch();
@@ -384,7 +322,7 @@ const startFirstHalf = async () => {
 
 const endFirstHalf = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaFinPrimerTiempo: new Date()
         });
         await loadMatch();
@@ -405,7 +343,7 @@ const endFirstHalf = async () => {
 
 const startSecondHalf = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaInicioSegundoTiempo: new Date()
         });
         await loadMatch();
@@ -431,16 +369,16 @@ const endSecondHalf = async () => {
         };
 
         // If match allows ties and scores are equal, end the match
-        if (match.value.permiteEmpates) {
-            const localStats = getTeamStats(match.value.equipoLocalId);
-            const visitorStats = getTeamStats(match.value.equipoVisitanteId);
+        if (allowsDraws.value) {
+            const localStats = getTeamStats(match.value?.equipoLocalId);
+            const visitorStats = getTeamStats(match.value?.equipoVisitanteId);
 
             if (localStats?.goles === visitorStats?.goles) {
                 updates.horaFinPartido = new Date();
             }
         }
 
-        await api.patch(`/partidos/${match.value.id}`, updates);
+        await api.patch(`/partidos/${match.value?.id}`, updates);
         await loadMatch();
         toast.add({
             severity: 'success',
@@ -459,7 +397,7 @@ const endSecondHalf = async () => {
 
 const startExtraTime1 = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaInicioTiempoExtra1: new Date()
         });
         await loadMatch();
@@ -480,7 +418,7 @@ const startExtraTime1 = async () => {
 
 const endExtraTime1 = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaFinTiempoExtra1: new Date()
         });
         await loadMatch();
@@ -501,7 +439,7 @@ const endExtraTime1 = async () => {
 
 const startExtraTime2 = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaInicioTiempoExtra2: new Date()
         });
         await loadMatch();
@@ -522,7 +460,7 @@ const startExtraTime2 = async () => {
 
 const endExtraTime2 = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaFinTiempoExtra2: new Date()
         });
         await loadMatch();
@@ -543,7 +481,7 @@ const endExtraTime2 = async () => {
 
 const startPenalties = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaInicioPenales: new Date()
         });
         await loadMatch();
@@ -564,7 +502,7 @@ const startPenalties = async () => {
 
 const endPenalties = async () => {
     try {
-        await api.patch(`/partidos/${match.value.id}`, {
+        await api.patch(`/partidos/${match.value?.id}`, {
             horaFinPenales: new Date(),
             horaFinPartido: new Date()
         });
@@ -584,23 +522,14 @@ const endPenalties = async () => {
     }
 };
 
-// Match events
-const showGoalDialog = () => {
-    goalForm.value = {
-        teamId: '',
-        playerId: ''
-    };
-    goalDialog.value = true;
-};
-
-const saveGoal = async () => {
+const addGoal = async ({ player, team }) => {
     try {
-        await api.post(`/partidos/${match.value.id}/estadistica-partidos`, {
-            equipoId: goalForm.value.teamId,
-            jugadorId: goalForm.value.playerId,
-            goles: 1
+        await api.post(`/estadisticas-partido`, {
+            goles: 1,
+            partidoId: match.value?.id,
+            equipoId: team.id,
+            jugadorId: player.id
         });
-        goalDialog.value = false;
         await loadMatch();
         toast.add({
             severity: 'success',
@@ -608,7 +537,7 @@ const saveGoal = async () => {
             detail: 'Gol registrado'
         });
     } catch (error) {
-        console.error('Error saving goal:', error);
+        console.error('Error adding goal:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -617,23 +546,45 @@ const saveGoal = async () => {
     }
 };
 
-const showCardDialog = () => {
-    cardForm.value = {
-        teamId: '',
-        playerId: '',
-        type: ''
-    };
+const addFoul = async ({ player, team }) => {
+    try {
+        await api.post(`/estadisticas-partido`, {
+            faltas: 1,
+            partidoId: match.value?.id,
+            equipoId: team.id,
+            jugadorId: player.id
+        });
+        await loadMatch();
+        toast.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Falta registrada'
+        });
+    } catch (error) {
+        console.error('Error adding foul:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo registrar la falta'
+        });
+    }
+};
+
+const showCardDialog = ({ player, team }) => {
+    selectedPlayer.value = player;
+    selectedTeam.value = team;
     cardDialog.value = true;
 };
 
-const saveCard = async () => {
+const assignCard = async (type: 'yellow' | 'blue' | 'red') => {
     try {
         const update: any = {
-            equipoId: cardForm.value.teamId,
-            jugadorId: cardForm.value.playerId
+            partidoId: match.value?.id,
+            equipoId: selectedTeam.value?.id,
+            jugadorId: selectedPlayer.value?.id
         };
 
-        switch (cardForm.value.type) {
+        switch (type) {
             case 'yellow':
                 update.tarjetasAmarillas = 1;
                 break;
@@ -645,7 +596,7 @@ const saveCard = async () => {
                 break;
         }
 
-        await api.post(`/partidos/${match.value.id}/estadistica-partidos`, update);
+        await api.post(`/estadisticas-partido`, update);
         cardDialog.value = false;
         await loadMatch();
         toast.add({
@@ -654,7 +605,7 @@ const saveCard = async () => {
             detail: 'Tarjeta registrada'
         });
     } catch (error) {
-        console.error('Error saving card:', error);
+        console.error('Error assigning card:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
@@ -663,17 +614,28 @@ const saveCard = async () => {
     }
 };
 
-const requestTime = () => {
+const requestTime = (team: Team) => {
+    timeRequestForm.value = {
+        periodo: 1,
+        equipoId: team.id,
+        partidoId: match.value?.id || ''
+    };
     timeRequestDialog.value = true;
+};
+
+const closeTimeRequestDialog = () => {
+    timeRequestDialog.value = false;
+    timeRequestForm.value = {
+        periodo: 1,
+        equipoId: '',
+        partidoId: ''
+    };
 };
 
 const saveTimeRequest = async () => {
     try {
-        await api.post(`/partidos/${match.value.id}/solicitud-tiempos`, {
-            periodo: timeRequestForm.value.periodo,
-            minuto: new Date()
-        });
-        timeRequestDialog.value = false;
+        await api.post(`/solicitudes-tiempo`, timeRequestForm.value);
+        closeTimeRequestDialog();
         await loadMatch();
         toast.add({
             severity: 'success',
@@ -690,44 +652,55 @@ const saveTimeRequest = async () => {
     }
 };
 
-const showPenaltyDialog = () => {
-    penaltyForm.value = {
-        teamId: '',
-        playerId: '',
-        gol: true
-    };
-    penaltyDialog.value = true;
-};
+const updateMvp = async () => {
+    if (!match.value) return;
 
-const savePenalty = async () => {
     try {
-        await api.post(`/partidos/${match.value.id}/penals`, {
-            equipoId: penaltyForm.value.teamId,
-            jugadorId: penaltyForm.value.playerId,
-            gol: penaltyForm.value.gol
+        await api.patch(`/partidos/${match.value.id}`, {
+            mvpId: selectedMvp.value
         });
-
-        if (penaltyForm.value.gol) {
-            await api.post(`/partidos/${match.value.id}/estadistica-partidos`, {
-                equipoId: penaltyForm.value.teamId,
-                jugadorId: penaltyForm.value.playerId,
-                goles: 1
-            });
-        }
-
-        penaltyDialog.value = false;
         await loadMatch();
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Penal registrado'
+            detail: 'MVP actualizado'
         });
     } catch (error) {
-        console.error('Error saving penalty:', error);
+        console.error('Error updating MVP:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo registrar el penal'
+            detail: 'No se pudo actualizar el MVP'
+        });
+    }
+};
+
+const endMatch = async () => {
+    if (!match.value?.mvpId) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Advertencia',
+            detail: 'Debe seleccionar un MVP antes de finalizar el partido'
+        });
+        return;
+    }
+
+    try {
+        await api.patch(`/partidos/${match.value.id}`, {
+            horaFinPartido: new Date()
+        });
+        await loadMatch();
+        toast.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Partido finalizado'
+        });
+    } catch (error) {
+        console.error('Error ending match:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo finalizar el partido'
         });
     }
 };
