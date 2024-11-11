@@ -41,7 +41,7 @@
         <Column field="color" header="Color" sortable>
           <template #body="slotProps">
             <div class="flex items-center">
-              <div class="w-6 h-6 rounded-full border border-gray-200" :style="{ backgroundColor: slotProps.data.color }"></div>
+                <div class="w-6 h-6 rounded-full border border-gray-200" :style="{ backgroundColor: '#' + slotProps.data.color }"></div>
             </div>
           </template>
           <template #filter="{ filterModel, filterCallback }">

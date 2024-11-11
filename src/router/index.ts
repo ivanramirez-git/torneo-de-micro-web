@@ -19,16 +19,6 @@ const routes = [
     meta: { public: true }
   },
   {
-    path: '/matches/scoresheet',
-    component: () => import('../views/matches/MatchList.vue'),
-    meta: { public: true }
-  },
-  {
-    path: '/match/:id',
-    component: () => import('../views/MatchScoresheet.vue'),
-    meta: { public: true }
-  },
-  {
     path: '/admin',
     component: () => import('../views/admin/Dashboard.vue'),
     meta: { requiresAuth: true },
@@ -65,6 +55,10 @@ const routes = [
       {
         path: 'matches',
         component: () => import('../views/admin/Matches.vue')
+      },
+      {
+        path: 'match-events/:id',
+        component: () => import('../views/admin/MatchEvents.vue')
       },
       {
         path: 'match-stats',
