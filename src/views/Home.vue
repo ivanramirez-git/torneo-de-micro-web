@@ -70,6 +70,30 @@
             </div>
           </div>
 
+          <!-- Statistics Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+            <!-- Top Scorers -->
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
+              <div class="space-y-3">
+                <div v-for="player in getTopScorers(tournament.id)" :key="player.id"
+                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
+                  <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
+                    <span class="font-medium mr-2">{{ player.nombre }}</span>
+                    <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
+                  </div>
+                  <span class="font-bold">{{ player.goles }} goles</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- MVP Stats Card -->
+            <MvpStatsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" :players="players" />
+
+
+          </div>
+
 
 
           <!-- Matches Section -->
@@ -123,47 +147,32 @@
 
           <!-- Statistics Cards -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+
+
             <!-- Least Scored Against -->
             <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
 
             <!-- Team Fouls Card -->
             <TeamFoulsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
+          </div>
 
-            <!-- MVP Stats Card -->
-            <MvpStatsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" :players="players" />
-
-            <!-- Top Scorers -->
-            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
-              <div class="space-y-3">
-                <div v-for="player in getTopScorers(tournament.id)" :key="player.id"
-                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
-                  <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
-                    <span class="font-medium mr-2">{{ player.nombre }}</span>
-                    <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
-                  </div>
-                  <span class="font-bold">{{ player.goles }} goles</span>
+          <!-- Dirty Players -->
+          <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h3 class="text-lg font-semibold mb-4">🚫 Jugadores más Sucios</h3>
+            <div class="space-y-3">
+              <div v-for="player in getDirtyPlayers(tournament.id)" :key="player.id"
+                class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
+                <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
+                  <span class="font-medium mr-2">{{ player.nombre }}</span>
+                  <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
                 </div>
-              </div>
-            </div>
-
-            <!-- Dirty Players -->
-            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 class="text-lg font-semibold mb-4">🚫 Jugadores más Sucios</h3>
-              <div class="space-y-3">
-                <div v-for="player in getDirtyPlayers(tournament.id)" :key="player.id"
-                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
-                  <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
-                    <span class="font-medium mr-2">{{ player.nombre }}</span>
-                    <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
-                  </div>
-                  <div class="flex items-center space-x-2 mt-1 sm:mt-0">
-                    <span v-if="player.tarjetasRojas" class="text-red-500">🟥 {{ player.tarjetasRojas }}</span>
-                    <span v-if="player.tarjetasAzules" class="text-blue-500">🟦 {{ player.tarjetasAzules }}</span>
-                    <span v-if="player.tarjetasAmarillas" class="text-yellow-500">🟨 {{ player.tarjetasAmarillas
-                      }}</span>
-                    <span v-if="player.faltas" class="text-gray-500">🛑 {{ player.faltas }}</span>
-                  </div>
+                <div class="flex items-center space-x-2 mt-1 sm:mt-0">
+                  <span v-if="player.tarjetasRojas" class="text-red-500">🟥 {{ player.tarjetasRojas }}</span>
+                  <span v-if="player.tarjetasAzules" class="text-blue-500">🟦 {{ player.tarjetasAzules }}</span>
+                  <span v-if="player.tarjetasAmarillas" class="text-yellow-500">🟨 {{ player.tarjetasAmarillas
+                    }}</span>
+                  <span v-if="player.faltas" class="text-gray-500">🛑 {{ player.faltas }}</span>
                 </div>
               </div>
             </div>

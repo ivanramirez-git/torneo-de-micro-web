@@ -24,7 +24,13 @@
                     <div class="text-center">
                         <span class="text-sm text-gray-500">Promedio</span>
                         <p class="text-xl font-bold">
-                            {{ (team.goalsAgainst / (team.matchesPlayed || 1)).toFixed(2) }}
+                            <!-- Mostrar '-' si no ha jugado partidos -->
+                            <span v-if="team.matchesPlayed > 0">
+                                {{ (team.goalsAgainst / team.matchesPlayed).toFixed(2) }}
+                            </span>
+                            <span v-else>
+                                -
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -96,9 +102,17 @@ const sortedTeams = computed(() => {
     // Convertir a array y ordenar
     return Array.from(teamStats.values())
         .sort((a, b) => {
-            const avgA = a.goalsAgainst / (a.matchesPlayed || 1);
-            const avgB = b.goalsAgainst / (b.matchesPlayed || 1);
-            return avgA - avgB;
+            // Si ambos equipos han jugado partidos, comparar por promedio
+            if (a.matchesPlayed > 0 && b.matchesPlayed > 0) {
+                const avgA = a.goalsAgainst / a.matchesPlayed;
+                const avgB = b.goalsAgainst / b.matchesPlayed;
+                return avgA - avgB;
+            }
+            // Si solo uno ha jugado partidos, el que ha jugado va primero
+            if (a.matchesPlayed > 0) return -1;
+            if (b.matchesPlayed > 0) return 1;
+            // Si ninguno ha jugado partidos, mantener el orden original
+            return 0;
         });
 });
 </script>
