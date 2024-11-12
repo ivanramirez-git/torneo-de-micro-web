@@ -54,7 +54,15 @@ const editingStat = ref<MatchStatistics | undefined>();
 const loadStats = async () => {
   try {
     loading.value = true;
-    const response = await api.get('/estadisticas-partido');
+    const response = await api.get('/estadisticas-partido',
+      {
+        params: {
+          filter: {
+            order: "createdAt DESC",
+          },
+        }
+      }
+    );
     stats.value = response.data;
   } catch (error) {
     console.error('Error loading stats:', error);
@@ -71,7 +79,7 @@ const loadStats = async () => {
 const loadMatches = async () => {
   try {
     const response = await api.get('/partidos');
-    
+
     matches.value = response.data;
   } catch (error) {
     console.error('Error loading matches:', error);
