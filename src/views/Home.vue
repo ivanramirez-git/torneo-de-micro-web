@@ -148,6 +148,7 @@ import { ref, onMounted } from 'vue';
 import StatusBadge from '../components/matches/StatusBadge.vue';
 import LeastScoredAgainstCard from '../components/matches/LeastScoredAgainstCard.vue';
 import api from '../stores/api';
+import { Match } from '../interfaces';
 
 // State
 const tournaments = ref([]);
@@ -362,79 +363,85 @@ const getTournamentPhases = (tournamentId: string) => {
 const getPhaseGroups = (phaseId: string) => {
   return groups.value.filter(g => g.faseTorneoId === phaseId);
 };
-
 const getGroupStats = (groupId: string) => {
   // Get all teams in the group
   const groupTeamIds = teamGroups.value
     .filter(tg => tg.grupoId === groupId)
     .map(tg => tg.equipoId);
 
-  // Get all matches for this group
-  const groupMatches = matches.value.filter(m => m.grupoId === groupId);
+  // Get all matches for this group that have started
+  const groupMatches = matches.value.filter(
+    m => m.grupoId === groupId && m.horaInicioPrimerTiempo
+  );
 
   // Calculate stats for each team
-  return groupTeamIds.map(teamId => {
-    const teamMatches = groupMatches.filter(m =>
-      m.equipoLocalId === teamId || m.equipoVisitanteId === teamId
-    );
+  return groupTeamIds
+    .map(teamId => {
+      const teamMatches = groupMatches.filter(
+        m => m.equipoLocalId === teamId || m.equipoVisitanteId === teamId
+      );
 
-    let stats = {
-      teamId,
-      played: teamMatches.length,
-      won: 0,
-      drawn: 0,
-      lost: 0,
-      goalsFor: 0,
-      goalsAgainst: 0,
-      points: 0
-    };
+      let stats = {
+        teamId,
+        played: teamMatches.length,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        points: 0
+      };
 
-    teamMatches.forEach(match => {
-      const isLocal = match.equipoLocalId === teamId;
-      const localGoals = match.estadisticasPartido
-        ?.filter(s => s.equipoId === match.equipoLocalId)
-        .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
-      const visitorGoals = match.estadisticasPartido
-        ?.filter(s => s.equipoId === match.equipoVisitanteId)
-        .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
+      teamMatches.forEach((match: Match) => {
+        const isLocal = match.equipoLocalId === teamId;
+        const localGoals =
+          match.estadisticasPartido
+            ?.filter(s => s.equipoId === match.equipoLocalId)
+            .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
+        const visitorGoals =
+          match.estadisticasPartido
+            ?.filter(s => s.equipoId === match.equipoVisitanteId)
+            .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
 
-      if (isLocal) {
-        stats.goalsFor += localGoals;
-        stats.goalsAgainst += visitorGoals;
-      } else {
-        stats.goalsFor += visitorGoals;
-        stats.goalsAgainst += localGoals;
-      }
-
-      if (localGoals > visitorGoals) {
         if (isLocal) {
-          stats.won++;
-          stats.points += 3;
+          stats.goalsFor += localGoals;
+          stats.goalsAgainst += visitorGoals;
         } else {
-          stats.lost++;
+          stats.goalsFor += visitorGoals;
+          stats.goalsAgainst += localGoals;
         }
-      } else if (localGoals < visitorGoals) {
-        if (isLocal) {
-          stats.lost++;
+
+        if (localGoals > visitorGoals) {
+          if (isLocal) {
+            stats.won++;
+            stats.points += 3;
+          } else {
+            stats.lost++;
+          }
+        } else if (localGoals < visitorGoals) {
+          if (isLocal) {
+            stats.lost++;
+          } else {
+            stats.won++;
+            stats.points += 3;
+          }
         } else {
-          stats.won++;
-          stats.points += 3;
+          stats.drawn++;
+          stats.points += 1;
         }
-      } else {
-        stats.drawn++;
-        stats.points += 1;
-      }
+      });
+
+      return stats;
+    })
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      const goalDiffA = a.goalsFor - a.goalsAgainst;
+      const goalDiffB = b.goalsFor - b.goalsAgainst;
+      if (goalDiffB !== goalDiffA) return goalDiffB - goalDiffA;
+      return b.goalsFor - a.goalsFor;
     });
-
-    return stats;
-  }).sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    const goalDiffA = a.goalsFor - a.goalsAgainst;
-    const goalDiffB = b.goalsFor - b.goalsAgainst;
-    if (goalDiffB !== goalDiffA) return goalDiffB - goalDiffA;
-    return b.goalsFor - a.goalsFor;
-  });
 };
+
 
 onMounted(loadData);
 </script>
