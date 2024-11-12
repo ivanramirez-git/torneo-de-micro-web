@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100 py-4 px-2 sm:py-8 sm:px-4">
     <div class="max-w-7xl mx-auto">
-      <h1 class="text-3xl font-bold text-center mb-6 sm:mb-12">Copa navideña 🎄 2024</h1>
 
       <!-- Tournament Sections -->
       <div class="space-y-6 sm:space-y-12">

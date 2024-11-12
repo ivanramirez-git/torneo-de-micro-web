@@ -9,15 +9,6 @@
             </router-link>
           </div>
           <div class="flex items-center space-x-4">
-            <!-- Match Management Buttons -->
-            <router-link to="/matches"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              Tabla de Partidos
-            </router-link>
-            <router-link to="/matches/scoresheet"
-              class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-              Planillar Partidos
-            </router-link>
 
             <!-- Admin Navigation -->
             <template v-if="authStore.isAuthenticated">
