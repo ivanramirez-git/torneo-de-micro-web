@@ -2,12 +2,15 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h3 class="text-xl font-bold mb-4">🛑 Estadísticas Disciplinarias por Equipo</h3>
         <div class="space-y-4">
-            <div v-for="(team, index) in sortedTeams" :key="team.id" class="flex items-center justify-between">
+            <div v-for="(team, index) in sortedTeams" :key="team.id"
+                class="flex items-center justify-around sm:justify-between">
                 <div class="flex items-center space-x-3">
                     <span class="text-lg font-bold text-gray-500">{{ index + 1 }}</span>
                     <img v-if="team.escudoUrl" :src="team.escudoUrl" :alt="team.nombre"
                         class="w-8 h-8 object-contain" />
-                    <span :style="{ color: team.color }" class="font-semibold">{{ team.nombre }}</span>
+                    <span :style="{ color: team.color }" class="font-semibold hidden sm:inline">
+                        {{ team.nombre }}
+                    </span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-center">
@@ -64,7 +67,7 @@ interface TeamStats {
 const sortedTeams = computed(() => {
     const teamStats = new Map<string, TeamStats>();
 
-    // Initialize team stats
+    // Inicializar estadísticas de equipos
     props.teams.forEach(team => {
         teamStats.set(team.id, {
             id: team.id,
@@ -79,12 +82,12 @@ const sortedTeams = computed(() => {
         });
     });
 
-    // Calculate fouls from matches
+    // Calcular faltas de los partidos
     props.matches.forEach(match => {
-        // Only consider matches that have started
+        // Solo considerar partidos que han comenzado
         if (!match.horaInicioPrimerTiempo || !match.estadisticasPartido) return;
 
-        // Count fouls for each team
+        // Contar faltas por equipo
         match.estadisticasPartido.forEach(stat => {
             const teamStat = teamStats.get(stat.equipoId);
             if (teamStat) {
@@ -92,21 +95,21 @@ const sortedTeams = computed(() => {
             }
         });
 
-        // Increment matches played
+        // Incrementar partidos jugados
         const localTeam = teamStats.get(match.equipoLocalId);
         const visitorTeam = teamStats.get(match.equipoVisitanteId);
         if (localTeam) localTeam.matchesPlayed++;
         if (visitorTeam) visitorTeam.matchesPlayed++;
     });
 
-    // Calculate cards based on fouls
+    // Calcular tarjetas basadas en faltas
     teamStats.forEach(team => {
         team.tarjetasAmarillas = Math.floor(team.fouls / 3);
         team.tarjetasAzules = Math.floor(team.fouls / 8);
         team.tarjetasRojas = Math.floor(team.fouls / 10);
     });
 
-    // Convert to array and sort by total disciplinary points per match
+    // Convertir a array y ordenar por puntos disciplinarios por partido
     return Array.from(teamStats.values())
         .sort((a, b) => {
             const pointsA =

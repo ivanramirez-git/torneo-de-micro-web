@@ -11,10 +11,94 @@
           <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" :style="{ color: tournament.color }">
             {{ tournament.nombre }}
           </h2>
+          <!-- Tournament Phases and Groups -->
+          <div class="space-y-6">
+            <div v-for="phase in getTournamentPhases(tournament.id)" :key="phase.id"
+              class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+              <h3 class="text-lg font-semibold mb-4">{{ phase.nombre }}</h3>
+
+              <!-- Groups in Phase -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div v-for="group in getPhaseGroups(phase.id)" :key="group.id"
+                  class="border rounded-lg p-4 overflow-x-auto">
+                  <h4 class="font-medium mb-3">{{ group.nombre }}</h4>
+
+                  <!-- Responsive table wrapper -->
+                  <div class="overflow-x-auto">
+                    <table class="w-full">
+                      <thead>
+                        <tr class="text-left text-sm">
+                          <th class="sticky left-0 bg-white pb-2 pl-4 sm:pl-0 w-12">Pos</th>
+                          <th class="sticky left-12 bg-white pb-2 w-12 sm:w-auto">Equipo</th>
+                          <th class="pb-2 text-center">Pts</th>
+                          <th class="pb-2 text-center">PJ</th>
+                          <th class="pb-2 text-center">PG</th>
+                          <th class="pb-2 text-center">PE</th>
+                          <th class="pb-2 text-center">PP</th>
+                          <th class="pb-2 text-center">GF</th>
+                          <th class="pb-2 text-center">GC</th>
+                          <th class="pb-2 text-center">Faltas</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(stats, index) in getGroupStats(group.id)" :key="stats.teamId" class="border-t">
+                          <td class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500 w-12">
+                            {{ index + 1 }}
+                          </td>
+                          <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
+                            <div class="flex items-center">
+                              <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
+                                :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
+                              <span class="hidden sm:inline ml-2 truncate max-w-xs">
+                                {{ getTeamName(stats.teamId) }}
+                              </span>
+                            </div>
+                          </td>
+                          <td class="py-2 text-center font-bold">{{ stats.points }}</td>
+                          <td class="py-2 text-center">{{ stats.played }}</td>
+                          <td class="py-2 text-center">{{ stats.won }}</td>
+                          <td class="py-2 text-center">{{ stats.drawn }}</td>
+                          <td class="py-2 text-center">{{ stats.lost }}</td>
+                          <td class="py-2 text-center">{{ stats.goalsFor }}</td>
+                          <td class="py-2 text-center">{{ stats.goalsAgainst }}</td>
+                          <td class="py-2 text-center">{{ stats.fouls }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
 
           <!-- Matches Section -->
           <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
             <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
+
+            <!-- Upcoming Matches -->
+
+            <div class="mb-6">
+              <h4 class="text-md font-medium mb-3">Próximos Partidos</h4>
+              <div class="space-y-4">
+                <div v-for="match in getUpcomingMatches(tournament.id)" :key="match.id"
+                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 sm:mb-0">
+                      <span class="text-sm text-gray-500">{{ formatDate(match.fechaProgramacion) }}</span>
+                      <span class="text-sm text-gray-500">{{ formatTime(match.horaProgramacion) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between sm:justify-start space-x-2">
+                      <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
+                      <span class="text-sm">vs</span>
+                      <span class="font-medium">{{ getTeamName(match.equipoVisitanteId) }}</span>
+                    </div>
+                  </div>
+                  <span class="text-sm text-gray-500 mt-1 sm:mt-0">{{ match.lugar?.nombre }}</span>
+                </div>
+              </div>
+            </div>
 
             <!-- Previous Matches -->
             <div class="mb-6">
@@ -35,81 +119,7 @@
               </div>
             </div>
 
-            <!-- Upcoming Matches -->
-            <div>
-              <h4 class="text-md font-medium mb-3">Próximos Partidos</h4>
-              <div class="space-y-4">
-                <div v-for="match in getUpcomingMatches(tournament.id)" :key="match.id"
-                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 sm:mb-0">
-                      <span class="text-sm text-gray-500">{{ formatDate(match.fechaProgramacion) }}</span>
-                      <span class="text-sm text-gray-500">{{ formatTime(match.horaProgramacion) }}</span>
-                    </div>
-                    <div class="flex items-center justify-between sm:justify-start space-x-2">
-                      <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
-                      <span class="text-sm">vs</span>
-                      <span class="font-medium">{{ getTeamName(match.equipoVisitanteId) }}</span>
-                    </div>
-                  </div>
-                  <span class="text-sm text-gray-500 mt-1 sm:mt-0">{{ match.lugar?.nombre }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Tournament Phases and Groups -->
-          <div class="space-y-6">
-            <div v-for="phase in getTournamentPhases(tournament.id)" :key="phase.id"
-              class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-              <h3 class="text-lg font-semibold mb-4">{{ phase.nombre }}</h3>
-
-              <!-- Groups in Phase -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div v-for="group in getPhaseGroups(phase.id)" :key="group.id"
-                  class="border rounded-lg p-4 overflow-x-auto">
-                  <h4 class="font-medium mb-3">{{ group.nombre }}</h4>
-
-                  <!-- Responsive table wrapper -->
-                  <div class="overflow-x-auto -mx-4 sm:mx-0">
-                    <table class="w-full min-w-[700px]">
-                      <thead>
-                        <tr class="text-left text-sm">
-                          <th class="sticky left-0 bg-white pb-2 pl-4 sm:pl-0">Pos</th>
-                          <th class="sticky left-12 bg-white pb-2">Equipo</th>
-                          <th class="pb-2 text-center">PJ</th>
-                          <th class="pb-2 text-center">PG</th>
-                          <th class="pb-2 text-center">PE</th>
-                          <th class="pb-2 text-center">PP</th>
-                          <th class="pb-2 text-center">GF</th>
-                          <th class="pb-2 text-center">GC</th>
-                          <th class="pb-2 text-center">Faltas</th>
-                          <th class="pb-2 text-center">Pts</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(stats, index) in getGroupStats(group.id)" :key="stats.teamId" class="border-t">
-                          <td class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500">
-                            {{ index + 1 }}
-                          </td>
-                          <td class="sticky left-12 bg-white py-2 font-medium">
-                            {{ getTeamName(stats.teamId) }}
-                          </td>
-                          <td class="py-2 text-center">{{ stats.played }}</td>
-                          <td class="py-2 text-center">{{ stats.won }}</td>
-                          <td class="py-2 text-center">{{ stats.drawn }}</td>
-                          <td class="py-2 text-center">{{ stats.lost }}</td>
-                          <td class="py-2 text-center">{{ stats.goalsFor }}</td>
-                          <td class="py-2 text-center">{{ stats.goalsAgainst }}</td>
-                          <td class="py-2 text-center">{{ stats.fouls }}</td>
-                          <td class="py-2 text-center font-bold">{{ stats.points }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Statistics Cards -->
@@ -236,6 +246,11 @@ const loadData = async () => {
 const getTeamName = (teamId: string): string => {
   const team = teams.value.find(t => t.id === teamId);
   return team?.nombre || '';
+};
+
+const getTeamCrest = (teamId: string): string => {
+  const team = teams.value.find(t => t.id === teamId);
+  return team?.escudoUrl || '';
 };
 
 const formatDate = (date: string): string => {

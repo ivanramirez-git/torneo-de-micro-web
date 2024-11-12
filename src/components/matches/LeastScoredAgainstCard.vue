@@ -2,12 +2,15 @@
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h3 class="text-xl font-bold mb-4">🥅 Portería Menos Vencida</h3>
         <div class="space-y-4">
-            <div v-for="(team, index) in sortedTeams" :key="team.id" class="flex items-center justify-between">
+            <div v-for="(team, index) in sortedTeams" :key="team.id"
+                class="flex items-center justify-around sm:justify-between">
                 <div class="flex items-center space-x-3">
                     <span class="text-lg font-bold text-gray-500">{{ index + 1 }}</span>
                     <img v-if="team.escudoUrl" :src="team.escudoUrl" :alt="team.nombre"
                         class="w-8 h-8 object-contain" />
-                    <span :style="{ color: team.color }" class="font-semibold">{{ team.nombre }}</span>
+                    <span :style="{ color: team.color }" class="font-semibold hidden sm:inline">
+                        {{ team.nombre }}
+                    </span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-center">
@@ -20,7 +23,8 @@
                     </div>
                     <div class="text-center">
                         <span class="text-sm text-gray-500">Promedio</span>
-                        <p class="text-xl font-bold">{{ (team.goalsAgainst / (team.matchesPlayed || 1)).toFixed(2) }}
+                        <p class="text-xl font-bold">
+                            {{ (team.goalsAgainst / (team.matchesPlayed || 1)).toFixed(2) }}
                         </p>
                     </div>
                 </div>
@@ -50,7 +54,7 @@ interface TeamStats {
 const sortedTeams = computed(() => {
     const teamStats = new Map<string, TeamStats>();
 
-    // Initialize team stats
+    // Inicializar estadísticas de equipos
     props.teams.forEach(team => {
         teamStats.set(team.id, {
             id: team.id,
@@ -62,16 +66,16 @@ const sortedTeams = computed(() => {
         });
     });
 
-    // Calculate stats from matches
+    // Calcular estadísticas a partir de los partidos
     props.matches.forEach(match => {
         if (!match.estadisticasPartido) return;
 
-        // Get goals for each team in the match
+        // Obtener estadísticas de cada equipo en el partido
         const localTeamStats = teamStats.get(match.equipoLocalId);
         const visitorTeamStats = teamStats.get(match.equipoVisitanteId);
 
         if (localTeamStats && visitorTeamStats) {
-            // Calculate goals scored by each team
+            // Calcular goles en contra para cada equipo
             const goalsAgainstLocal = match.estadisticasPartido
                 .filter(s => s.equipoId === match.equipoVisitanteId)
                 .reduce((sum, s) => sum + (s.goles || 0), 0);
@@ -80,7 +84,7 @@ const sortedTeams = computed(() => {
                 .filter(s => s.equipoId === match.equipoLocalId)
                 .reduce((sum, s) => sum + (s.goles || 0), 0);
 
-            // Update stats
+            // Actualizar estadísticas
             localTeamStats.goalsAgainst += goalsAgainstLocal;
             localTeamStats.matchesPlayed++;
 
@@ -89,7 +93,7 @@ const sortedTeams = computed(() => {
         }
     });
 
-    // Convert to array and sort
+    // Convertir a array y ordenar
     return Array.from(teamStats.values())
         .sort((a, b) => {
             const avgA = a.goalsAgainst / (a.matchesPlayed || 1);
