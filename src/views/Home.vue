@@ -36,6 +36,7 @@
                           <th class="pb-2 text-center">PP</th>
                           <th class="pb-2 text-center">GF</th>
                           <th class="pb-2 text-center">GC</th>
+                          <th class="pb-2 text-center">DG</th>
                           <th class="pb-2 text-center">Faltas</th>
                         </tr>
                       </thead>
@@ -60,6 +61,7 @@
                           <td class="py-2 text-center">{{ stats.lost }}</td>
                           <td class="py-2 text-center">{{ stats.goalsFor }}</td>
                           <td class="py-2 text-center">{{ stats.goalsAgainst }}</td>
+                          <td class="py-2 text-center">{{ stats.goalsFor - stats.goalsAgainst }}</td>
                           <td class="py-2 text-center">{{ stats.fouls }}</td>
                         </tr>
                       </tbody>
