@@ -1,6 +1,11 @@
 <template>
     <DataTable :value="stats" :loading="loading" dataKey="id" paginator :rows="10" :rowsPerPageOptions="[10, 20, 50]"
         filterDisplay="menu" :filters="filters" class="p-datatable-lg">
+        <Column field="createdAt" header="Fecha Creación" sortable>
+            <template #body="slotProps">
+                {{ formatDateTime(slotProps.data.createdAt) }}
+            </template>
+        </Column>
         <Column field="partidoId" header="Partido" sortable>
             <template #body="slotProps">
                 <MatchInfo :match="getMatch(slotProps.data.partidoId)" />
@@ -28,6 +33,7 @@
                 </span>
             </template>
         </Column>
+
         <Column header="Acciones" :exportable="false" style="min-width:8rem">
             <template #body="slotProps">
                 <div class="flex gap-2">
@@ -70,7 +76,8 @@ defineEmits<{
 const filters = ref({
     partidoId: { value: null, matchMode: FilterMatchMode.EQUALS },
     equipoId: { value: null, matchMode: FilterMatchMode.EQUALS },
-    jugadorId: { value: null, matchMode: FilterMatchMode.EQUALS }
+    jugadorId: { value: null, matchMode: FilterMatchMode.EQUALS },
+    createdAt: { value: null, matchMode: FilterMatchMode.DATE_IS }
 });
 
 const getMatch = (matchId: string): Match | undefined => {
@@ -88,5 +95,9 @@ const getPlayer = (playerId: string): Player | undefined => {
 const truncateText = (text: string | undefined, maxLength: number): string => {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+};
+
+const formatDateTime = (date: string | Date): string => {
+    return new Date(date).toLocaleString();
 };
 </script>

@@ -71,6 +71,7 @@ const loadStats = async () => {
 const loadMatches = async () => {
   try {
     const response = await api.get('/partidos');
+    
     matches.value = response.data;
   } catch (error) {
     console.error('Error loading matches:', error);

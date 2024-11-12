@@ -8,19 +8,22 @@
 </template>
 
 <script setup lang="ts">
-import type { Match } from '../../interfaces';
+import type { Match, Team } from '../../interfaces';
 
 const props = defineProps<{
     match?: Match;
+    teams?: Team[];
 }>();
+
+console.log('match', props.match);
+console.log('teams', props.teams);
 
 const formatDate = (date: Date | string): string => {
     return new Date(date).toLocaleDateString();
 };
 
-const getTeamName = (teamId: string): string => {
-    // This should be improved by passing teams as props
-    // For now, just show the ID
+const getTeamName = (teamId: string): Promise<string> => {
     return teamId;
 };
+
 </script>
