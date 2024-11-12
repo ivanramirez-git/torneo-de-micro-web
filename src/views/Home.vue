@@ -56,7 +56,7 @@
             <h3 class="text-lg font-semibold mb-4">{{ phase.nombre }}</h3>
 
             <!-- Groups in Phase -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
               <div v-for="group in getPhaseGroups(phase.id)" :key="group.id" class="border rounded-lg p-4">
                 <h4 class="font-medium mb-3">{{ group.nombre }}</h4>
                 <table class="w-full">
