@@ -367,11 +367,9 @@ const getUpcomingMatches = (tournamentId: string) => {
 
   return matches.value
     .filter(m => {
-      const phase = phases.value.find(p => p.torneoId === tournamentId);
-      const group = groups.value.find(g => g.faseTorneoId === phase?.id);
       const matchDate = new Date(m.fechaProgramacion);
       matchDate.setHours(0, 0, 0, 0);
-      return m.grupoId === group?.id && matchDate >= today;
+      return matchDate >= today;
     })
     .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime())
     .slice(0, 5);
