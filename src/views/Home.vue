@@ -115,19 +115,13 @@
           <!-- Statistics Cards -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- Least Scored Against -->
-            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-              <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
-            </div>
+            <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
 
             <!-- Team Fouls Card -->
-            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-              <TeamFoulsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
-            </div>
+            <TeamFoulsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
 
             <!-- MVP Stats Card -->
-            <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-              <MvpStatsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" :players="players" />
-            </div>
+            <MvpStatsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" :players="players" />
 
             <!-- Top Scorers -->
             <div class="bg-white rounded-lg shadow p-4 sm:p-6">

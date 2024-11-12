@@ -1,6 +1,6 @@
 <template>
     <div class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-xl font-bold mb-4">🛑 Faltas por Equipo</h3>
+        <h3 class="text-xl font-bold mb-4">🛑 Estadísticas Disciplinarias por Equipo</h3>
         <div class="space-y-4">
             <div v-for="(team, index) in sortedTeams" :key="team.id" class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -11,15 +11,27 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Faltas</span>
+                        <span class="text-sm text-gray-500">🟥</span>
+                        <p class="text-xl font-bold">{{ team.tarjetasRojas }}</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-sm text-gray-500">🟦</span>
+                        <p class="text-xl font-bold">{{ team.tarjetasAzules }}</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-sm text-gray-500">🟨</span>
+                        <p class="text-xl font-bold">{{ team.tarjetasAmarillas }}</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-sm text-gray-500">F</span>
                         <p class="text-xl font-bold">{{ team.fouls }}</p>
                     </div>
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Partidos</span>
+                        <span class="text-sm text-gray-500">P</span>
                         <p class="text-xl font-bold">{{ team.matchesPlayed }}</p>
                     </div>
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Promedio</span>
+                        <span class="text-sm text-gray-500">Promedio Faltas</span>
                         <p class="text-xl font-bold">{{ (team.fouls / (team.matchesPlayed || 1)).toFixed(1) }}</p>
                     </div>
                 </div>
@@ -43,6 +55,9 @@ interface TeamStats {
     color: string;
     escudoUrl?: string;
     fouls: number;
+    tarjetasRojas: number;
+    tarjetasAzules: number;
+    tarjetasAmarillas: number;
     matchesPlayed: number;
 }
 
@@ -57,13 +72,17 @@ const sortedTeams = computed(() => {
             color: team.color,
             escudoUrl: team.escudoUrl,
             fouls: 0,
+            tarjetasRojas: 0,
+            tarjetasAzules: 0,
+            tarjetasAmarillas: 0,
             matchesPlayed: 0
         });
     });
 
-    // Calculate stats from matches
+    // Calculate fouls from matches
     props.matches.forEach(match => {
-        if (!match.estadisticasPartido) return;
+        // Only consider matches that have started
+        if (!match.horaInicioPrimerTiempo || !match.estadisticasPartido) return;
 
         // Count fouls for each team
         match.estadisticasPartido.forEach(stat => {
@@ -73,19 +92,30 @@ const sortedTeams = computed(() => {
             }
         });
 
-        // Count matches played
+        // Increment matches played
         const localTeam = teamStats.get(match.equipoLocalId);
         const visitorTeam = teamStats.get(match.equipoVisitanteId);
         if (localTeam) localTeam.matchesPlayed++;
         if (visitorTeam) visitorTeam.matchesPlayed++;
     });
 
-    // Convert to array and sort by fouls per match
+    // Calculate cards based on fouls
+    teamStats.forEach(team => {
+        team.tarjetasAmarillas = Math.floor(team.fouls / 3);
+        team.tarjetasAzules = Math.floor(team.fouls / 8);
+        team.tarjetasRojas = Math.floor(team.fouls / 10);
+    });
+
+    // Convert to array and sort by total disciplinary points per match
     return Array.from(teamStats.values())
         .sort((a, b) => {
-            const avgA = a.fouls / (a.matchesPlayed || 1);
-            const avgB = b.fouls / (b.matchesPlayed || 1);
-            return avgB - avgA;
+            const pointsA =
+                (a.tarjetasRojas * 3 + a.tarjetasAzules * 2 + a.tarjetasAmarillas + a.fouls * 0.5) /
+                (a.matchesPlayed || 1);
+            const pointsB =
+                (b.tarjetasRojas * 3 + b.tarjetasAzules * 2 + b.tarjetasAmarillas + b.fouls * 0.5) /
+                (b.matchesPlayed || 1);
+            return pointsB - pointsA;
         });
 });
 </script>

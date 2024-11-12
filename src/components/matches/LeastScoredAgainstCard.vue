@@ -11,11 +11,11 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Goles en contra</span>
+                        <span class="text-sm text-gray-500">GC</span>
                         <p class="text-xl font-bold">{{ team.goalsAgainst }}</p>
                     </div>
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Partidos</span>
+                        <span class="text-sm text-gray-500">P</span>
                         <p class="text-xl font-bold">{{ team.matchesPlayed }}</p>
                     </div>
                     <div class="text-center">
