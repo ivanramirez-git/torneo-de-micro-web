@@ -65,7 +65,8 @@ export interface Match extends BaseEntity {
   horaFinTiempoExtra2?: Date;
   horaInicioPenales?: Date;
   horaFinPenales?: Date;
-  mvpId?: string;
+  mvpEquipoLocalId?: string;
+  mvpEquipoVisitanteId?: string;
   horaFinPartido?: Date;
   equipoLocalId: string;
   equipoVisitanteId: string;

@@ -34,21 +34,34 @@
                     <Button v-if="match?.horaInicioPenales && !match?.horaFinPenales" label="Finalizar Penales"
                         severity="warning" @click="endPenalties" />
                     <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinPartido" label="Finalizar Partido"
-                        severity="danger" @click="endMatch" :disabled="!match?.mvpId" />
+                        severity="danger" @click="endMatch"
+                        :disabled="!match?.mvpEquipoLocalId || !match?.mvpEquipoVisitanteId" />
                     <MatchTimer :startTime="getCurrentPeriodStartTime" :period="currentPeriod"
                         :isActive="isMatchActive" />
                 </div>
-
                 <!-- MVP Selection -->
-                <div class="mt-4 max-w-md mx-auto">
-                    <h3 class="text-lg font-medium mb-2">🏆 MVP del Partido</h3>
-                    <Dropdown v-model="selectedMvp" :options="allPlayers" optionLabel="nombre" optionValue="id"
-                        placeholder="Seleccionar MVP" class="w-full" @change="updateMvp" />
+                <div class="mt-4 max-w-md mx-auto grid grid-cols-1 gap-4">
+                    <!-- Contenedor para MVP del equipo local -->
+                    <div class="flex flex-col">
+                        <h3 class="text-lg font-medium mb-2">🏆 MVP del Partido Equipo Local</h3>
+                        <Dropdown v-model="selectedMvpEquipoLocal" :options="allPlayers" optionLabel="nombre"
+                            optionValue="id" placeholder="Seleccionar MVP Equipo Local" class="w-full"
+                            @change="updateMvp" />
+                    </div>
+
+                    <!-- Contenedor para MVP del equipo visitante -->
+                    <div class="flex flex-col">
+                        <h3 class="text-lg font-medium mb-2">🏆 MVP del Partido Equipo Visitante</h3>
+                        <Dropdown v-model="selectedMvpEquipoVisitante" :options="allPlayers" optionLabel="nombre"
+                            optionValue="id" placeholder="Seleccionar MVP Equipo Visitante" class="w-full"
+                            @change="updateMvp" />
+                    </div>
                 </div>
 
+
                 <!-- Quick Actions -->
-                <QuickActions :isActive="isMatchActive" :hasRequestedTime="hasRequestedTimeInCurrentPeriod"
-                    @goal="showGoalDialog" @foul="showFoulDialog" @card="showCardDialog" @timeRequest="requestTime" />
+                <!-- <QuickActions :isActive="isMatchActive" :hasRequestedTime="hasRequestedTimeInCurrentPeriod"
+                    @goal="showGoalDialog" @foul="showFoulDialog" @card="showCardDialog" @timeRequest="requestTime" /> -->
             </div>
 
             <!-- Teams -->
@@ -109,7 +122,8 @@ const players = ref<Player[]>([]);
 const playerStats = ref<MatchStatistics[]>([]);
 const timeRequests = ref<SolicitudTiempo[]>([]);
 const loading = ref(true);
-const selectedMvp = ref<string | null>(null);
+const selectedMvpEquipoLocal = ref<string | null>(null);
+const selectedMvpEquipoVisitante = ref<string | null>(null);
 
 // Dialog states
 const goalDialog = ref(false);
@@ -177,7 +191,8 @@ const loadMatch = async () => {
             }
         });
         match.value = response.data;
-        selectedMvp.value = match.value.mvpId || null;
+        selectedMvpEquipoLocal.value = match.value?.mvpEquipoLocalId;
+        selectedMvpEquipoVisitante.value = match.value?.mvpEquipoVisitanteId;
 
         // Load related data
         await Promise.all([
@@ -386,7 +401,8 @@ const updateMvp = async () => {
 
     try {
         await api.patch(`/partidos/${match.value.id}`, {
-            mvpId: selectedMvp.value
+            mvpEquipoLocalId: selectedMvpEquipoLocal.value,
+            mvpEquipoVisitanteId: selectedMvpEquipoVisitante.value
         });
         await loadMatch();
         toast.add({
