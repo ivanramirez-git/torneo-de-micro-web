@@ -10,45 +10,6 @@
           {{ tournament.nombre }}
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <!-- Dirty Players -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">🚫 Jugadores más Sucios</h3>
-            <div class="space-y-4">
-              <div v-for="player in getDirtyPlayers(tournament.id)" :key="player.id"
-                class="flex items-center justify-between border-b pb-2">
-                <div class="flex items-center">
-                  <span class="font-medium">{{ player.nombre }}</span>
-                  <span class="text-sm text-gray-500 ml-2">({{ getTeamName(player.equipoId) }})</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <span v-if="player.tarjetasRojas" class="text-red-500">🟥 {{ player.tarjetasRojas }}</span>
-                  <span v-if="player.tarjetasAzules" class="text-blue-500">🟦 {{ player.tarjetasAzules }}</span>
-                  <span v-if="player.tarjetasAmarillas" class="text-yellow-500">🟨 {{ player.tarjetasAmarillas }}</span>
-                  <span v-if="player.faltas" class="text-gray-500">🛑 {{ player.faltas }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Top Scorers -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
-            <div class="space-y-4">
-              <div v-for="player in getTopScorers(tournament.id)" :key="player.id"
-                class="flex items-center justify-between border-b pb-2">
-                <div class="flex items-center">
-                  <span class="font-medium">{{ player.nombre }}</span>
-                  <span class="text-sm text-gray-500 ml-2">({{ getTeamName(player.equipoId) }})</span>
-                </div>
-                <div class="flex items-center">
-                  <span class="font-bold">{{ player.goles }} goles</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Matches Section -->
         <div class="bg-white rounded-lg shadow p-6 mb-8">
           <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
@@ -91,7 +52,7 @@
         <!-- Tournament Phases and Groups -->
         <div class="space-y-6">
           <div v-for="phase in getTournamentPhases(tournament.id)" :key="phase.id"
-            class="bg-white rounded-lg shadow p-6">
+            class="bg-white rounded-lg shadow p-6 mb-8">
             <h3 class="text-lg font-semibold mb-4">{{ phase.nombre }}</h3>
 
             <!-- Groups in Phase -->
@@ -128,6 +89,55 @@
             </div>
           </div>
         </div>
+
+
+        <!-- Least Scored Against -->
+        <div class="mb-8">
+          <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+
+
+          <!-- Top Scorers -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
+            <div class="space-y-4">
+              <div v-for="player in getTopScorers(tournament.id)" :key="player.id"
+                class="flex items-center justify-between border-b pb-2">
+                <div class="flex items-center">
+                  <span class="font-medium">{{ player.nombre }}</span>
+                  <span class="text-sm text-gray-500 ml-2">({{ getTeamName(player.equipoId) }})</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="font-bold">{{ player.goles }} goles</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dirty Players -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold mb-4">🚫 Jugadores más Sucios</h3>
+            <div class="space-y-4">
+              <div v-for="player in getDirtyPlayers(tournament.id)" :key="player.id"
+                class="flex items-center justify-between border-b pb-2">
+                <div class="flex items-center">
+                  <span class="font-medium">{{ player.nombre }}</span>
+                  <span class="text-sm text-gray-500 ml-2">({{ getTeamName(player.equipoId) }})</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span v-if="player.tarjetasRojas" class="text-red-500">🟥 {{ player.tarjetasRojas }}</span>
+                  <span v-if="player.tarjetasAzules" class="text-blue-500">🟦 {{ player.tarjetasAzules }}</span>
+                  <span v-if="player.tarjetasAmarillas" class="text-yellow-500">🟨 {{ player.tarjetasAmarillas }}</span>
+                  <span v-if="player.faltas" class="text-gray-500">🛑 {{ player.faltas }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </div>
     </div>
   </div>
@@ -136,6 +146,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import StatusBadge from '../components/matches/StatusBadge.vue';
+import LeastScoredAgainstCard from '../components/matches/LeastScoredAgainstCard.vue';
 import api from '../stores/api';
 
 // State
@@ -164,7 +175,20 @@ const loadData = async () => {
       api.get('/torneos'),
       api.get('/equipos'),
       api.get('/jugadores'),
-      api.get('/partidos'),
+      api.get('/partidos',
+        {
+          params: {
+            filter: {
+              include: [
+                'grupo',
+                'lugar',
+                'estadisticasPartido',
+                'solicitudesTiempo',
+                'penales'
+              ]
+            }
+          }
+        }),
       api.get('/fase-torneos'),
       api.get('/grupos'),
       api.get('/equipos-grupo'),
@@ -199,6 +223,9 @@ const formatTime = (time: string): string => {
 };
 
 const getMatchScore = (match: any): string => {
+
+  console.log(match);
+
   const localStats = match.estadisticasPartido?.filter(s => s.equipoId === match.equipoLocalId);
   const visitorStats = match.estadisticasPartido?.filter(s => s.equipoId === match.equipoVisitanteId);
 
@@ -288,6 +315,14 @@ const getTopScorers = (tournamentId: string) => {
     .slice(0, 5);
 };
 
+const getTournamentMatches = (tournamentId: string) => {
+  return matches.value.filter(m => {
+    const phase = phases.value.find(p => p.torneoId === tournamentId);
+    const group = groups.value.find(g => g.faseTorneoId === phase?.id);
+    return m.grupoId === group?.id;
+  });
+};
+
 const getPreviousMatches = (tournamentId: string) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -307,6 +342,7 @@ const getPreviousMatches = (tournamentId: string) => {
 const getUpcomingMatches = (tournamentId: string) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
 
   return matches.value
     .filter(m => {

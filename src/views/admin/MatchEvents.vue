@@ -59,11 +59,6 @@
                     </div>
                 </div>
 
-
-
-                <!-- Quick Actions -->
-                <!-- <QuickActions :isActive="isMatchActive" :hasRequestedTime="hasRequestedTimeInCurrentPeriod"
-                    @goal="showGoalDialog" @foul="showFoulDialog" @card="showCardDialog" @timeRequest="requestTime" /> -->
             </div>
 
             <!-- Teams -->
