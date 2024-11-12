@@ -39,12 +39,13 @@
                     <MatchTimer :startTime="getCurrentPeriodStartTime" :period="currentPeriod"
                         :isActive="isMatchActive" />
                 </div>
+
                 <!-- MVP Selection -->
-                <div class="mt-4 max-w-md mx-auto grid grid-cols-1 gap-4">
+                <div class="mt-4 max-w-md mx-auto grid grid-cols-2 gap-4">
                     <!-- Contenedor para MVP del equipo local -->
                     <div class="flex flex-col">
                         <h3 class="text-lg font-medium mb-2">🏆 MVP del Partido Equipo Local</h3>
-                        <Dropdown v-model="selectedMvpEquipoLocal" :options="allPlayers" optionLabel="nombre"
+                        <Dropdown v-model="selectedMvpEquipoLocal" :options="allPlayersLocal" optionLabel="nombre"
                             optionValue="id" placeholder="Seleccionar MVP Equipo Local" class="w-full"
                             @change="updateMvp" />
                     </div>
@@ -52,11 +53,12 @@
                     <!-- Contenedor para MVP del equipo visitante -->
                     <div class="flex flex-col">
                         <h3 class="text-lg font-medium mb-2">🏆 MVP del Partido Equipo Visitante</h3>
-                        <Dropdown v-model="selectedMvpEquipoVisitante" :options="allPlayers" optionLabel="nombre"
-                            optionValue="id" placeholder="Seleccionar MVP Equipo Visitante" class="w-full"
-                            @change="updateMvp" />
+                        <Dropdown v-model="selectedMvpEquipoVisitante" :options="allPlayersVisitante"
+                            optionLabel="nombre" optionValue="id" placeholder="Seleccionar MVP Equipo Visitante"
+                            class="w-full" @change="updateMvp" />
                     </div>
                 </div>
+
 
 
                 <!-- Quick Actions -->
@@ -162,9 +164,13 @@ const getCurrentPeriodStartTime = computed(() => {
     return undefined;
 });
 
-const allPlayers = computed(() => {
+const allPlayersLocal = computed(() => {
     return players.value.filter(p =>
-        p.equipoId === match.value?.equipoLocalId ||
+        p.equipoId === match.value?.equipoLocalId
+    );
+});
+const allPlayersVisitante = computed(() => {
+    return players.value.filter(p =>
         p.equipoId === match.value?.equipoVisitanteId
     );
 });
