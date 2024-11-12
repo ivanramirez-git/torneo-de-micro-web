@@ -632,7 +632,7 @@ const endPenalties = async () => {
 };
 
 const endMatch = async () => {
-    if (!match.value?.mvpId) {
+    if (!match.value?.mvpEquipoLocalId || !match.value?.mvpEquipoVisitanteId) {
         toast.add({
             severity: 'warn',
             summary: 'Advertencia',

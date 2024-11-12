@@ -175,20 +175,19 @@ const loadData = async () => {
       api.get('/torneos'),
       api.get('/equipos'),
       api.get('/jugadores'),
-      api.get('/partidos',
-        {
-          params: {
-            filter: {
-              include: [
-                'grupo',
-                'lugar',
-                'estadisticasPartido',
-                'solicitudesTiempo',
-                'penales'
-              ]
-            }
+      api.get('/partidos', {
+        params: {
+          filter: {
+            include: [
+              'grupo',
+              'lugar',
+              'estadisticasPartido',
+              'solicitudesTiempo',
+              'penales'
+            ]
           }
-        }),
+        }
+      }),
       api.get('/fase-torneos'),
       api.get('/grupos'),
       api.get('/equipos-grupo'),
