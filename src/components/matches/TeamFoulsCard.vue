@@ -1,6 +1,6 @@
 <template>
     <div class="bg-white rounded-lg shadow-lg p-6">
-        <h3 class="text-xl font-bold mb-4">🥅 Portería Menos Vencida</h3>
+        <h3 class="text-xl font-bold mb-4">🛑 Faltas por Equipo</h3>
         <div class="space-y-4">
             <div v-for="(team, index) in sortedTeams" :key="team.id" class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -11,8 +11,8 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Goles en contra</span>
-                        <p class="text-xl font-bold">{{ team.goalsAgainst }}</p>
+                        <span class="text-sm text-gray-500">Faltas</span>
+                        <p class="text-xl font-bold">{{ team.fouls }}</p>
                     </div>
                     <div class="text-center">
                         <span class="text-sm text-gray-500">Partidos</span>
@@ -20,8 +20,7 @@
                     </div>
                     <div class="text-center">
                         <span class="text-sm text-gray-500">Promedio</span>
-                        <p class="text-xl font-bold">{{ (team.goalsAgainst / (team.matchesPlayed || 1)).toFixed(2) }}
-                        </p>
+                        <p class="text-xl font-bold">{{ (team.fouls / (team.matchesPlayed || 1)).toFixed(1) }}</p>
                     </div>
                 </div>
             </div>
@@ -43,7 +42,7 @@ interface TeamStats {
     nombre: string;
     color: string;
     escudoUrl?: string;
-    goalsAgainst: number;
+    fouls: number;
     matchesPlayed: number;
 }
 
@@ -57,7 +56,7 @@ const sortedTeams = computed(() => {
             nombre: team.nombre,
             color: team.color,
             escudoUrl: team.escudoUrl,
-            goalsAgainst: 0,
+            fouls: 0,
             matchesPlayed: 0
         });
     });
@@ -66,35 +65,27 @@ const sortedTeams = computed(() => {
     props.matches.forEach(match => {
         if (!match.estadisticasPartido) return;
 
-        // Get goals for each team in the match
-        const localTeamStats = teamStats.get(match.equipoLocalId);
-        const visitorTeamStats = teamStats.get(match.equipoVisitanteId);
+        // Count fouls for each team
+        match.estadisticasPartido.forEach(stat => {
+            const teamStat = teamStats.get(stat.equipoId);
+            if (teamStat) {
+                teamStat.fouls += stat.faltas || 0;
+            }
+        });
 
-        if (localTeamStats && visitorTeamStats) {
-            // Calculate goals scored by each team
-            const goalsAgainstLocal = match.estadisticasPartido
-                .filter(s => s.equipoId === match.equipoVisitanteId)
-                .reduce((sum, s) => sum + (s.goles || 0), 0);
-
-            const goalsAgainstVisitor = match.estadisticasPartido
-                .filter(s => s.equipoId === match.equipoLocalId)
-                .reduce((sum, s) => sum + (s.goles || 0), 0);
-
-            // Update stats
-            localTeamStats.goalsAgainst += goalsAgainstLocal;
-            localTeamStats.matchesPlayed++;
-
-            visitorTeamStats.goalsAgainst += goalsAgainstVisitor;
-            visitorTeamStats.matchesPlayed++;
-        }
+        // Count matches played
+        const localTeam = teamStats.get(match.equipoLocalId);
+        const visitorTeam = teamStats.get(match.equipoVisitanteId);
+        if (localTeam) localTeam.matchesPlayed++;
+        if (visitorTeam) visitorTeam.matchesPlayed++;
     });
 
-    // Convert to array and sort
+    // Convert to array and sort by fouls per match
     return Array.from(teamStats.values())
         .sort((a, b) => {
-            const avgA = a.goalsAgainst / (a.matchesPlayed || 1);
-            const avgB = b.goalsAgainst / (b.matchesPlayed || 1);
-            return avgA - avgB;
+            const avgA = a.fouls / (a.matchesPlayed || 1);
+            const avgB = b.fouls / (b.matchesPlayed || 1);
+            return avgB - avgA;
         });
 });
 </script>
