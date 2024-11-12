@@ -1,7 +1,7 @@
 <template>
     <div v-if="match" class="flex items-center space-x-2">
-        <span class="text-gray-600">{{ formatDate(match.fechaProgramacion) }}</span>
-        <span class="text-gray-400">|</span>
+        <!-- <span class="text-gray-600">{{ formatDate(match.fechaProgramacion) }}</span>
+        <span class="text-gray-400">|</span> -->
         <span>{{ getTeamName(match.equipoLocalId) }} vs {{ getTeamName(match.equipoVisitanteId) }}</span>
     </div>
     <span v-else class="text-gray-400">Partido no encontrado</span>
@@ -23,7 +23,9 @@ const formatDate = (date: Date | string): string => {
 };
 
 const getTeamName = (teamId: string): Promise<string> => {
-    return teamId;
+
+    const team = props.teams?.find(t => t.id === teamId);
+    return team ? team.nombre : 'Equipo no encontrado';
 };
 
 </script>

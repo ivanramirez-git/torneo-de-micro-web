@@ -6,9 +6,14 @@
                 {{ formatDateTime(slotProps.data.createdAt) }}
             </template>
         </Column>
+        <Column field="fechaProgramacion" header="Fecha de Partido" sortable>
+            <template #body="slotProps">
+                {{ getFormatDateTime(slotProps.data.partidoId) }}
+            </template>
+        </Column>
         <Column field="partidoId" header="Partido" sortable>
             <template #body="slotProps">
-                <MatchInfo :match="getMatch(slotProps.data.partidoId)" />
+                <MatchInfo :match="getMatch(slotProps.data.partidoId)" :teams="teams" />
             </template>
         </Column>
         <Column field="equipoId" header="Equipo" sortable>
@@ -99,5 +104,10 @@ const truncateText = (text: string | undefined, maxLength: number): string => {
 
 const formatDateTime = (date: string | Date): string => {
     return new Date(date).toLocaleString();
+};
+
+const getFormatDateTime = (matchId: string): string => {
+    const match = props.matches.find(m => m.id === matchId);
+    return match ? new Date(match.fechaProgramacion).toLocaleDateString() : '';
 };
 </script>
