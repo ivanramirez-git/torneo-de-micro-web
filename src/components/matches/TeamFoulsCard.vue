@@ -26,16 +26,16 @@
                         <p class="text-xl font-bold">{{ team.tarjetasAmarillas }}</p>
                     </div>
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">F</span>
+                        <span class="text-sm text-gray-500">🛑</span>
                         <p class="text-xl font-bold">{{ team.fouls }}</p>
                     </div>
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">P</span>
+                        <span class="text-sm text-gray-500">PJ</span>
                         <p class="text-xl font-bold">{{ team.matchesPlayed }}</p>
                     </div>
                     <div class="text-center">
-                        <span class="text-sm text-gray-500">Promedio Faltas</span>
-                        <p class="text-xl font-bold">{{ (team.fouls / (team.matchesPlayed || 1)).toFixed(1) }}</p>
+                        <span class="text-sm text-gray-500">Puntos Disciplinarios</span>
+                        <p class="text-xl font-bold ">{{ team.puntosDisciplinarios }}</p>
                     </div>
                 </div>
             </div>
@@ -62,6 +62,7 @@ interface TeamStats {
     tarjetasAzules: number;
     tarjetasAmarillas: number;
     matchesPlayed: number;
+    puntosDisciplinarios: number;
 }
 
 const sortedTeams = computed(() => {
@@ -78,20 +79,31 @@ const sortedTeams = computed(() => {
             tarjetasRojas: 0,
             tarjetasAzules: 0,
             tarjetasAmarillas: 0,
-            matchesPlayed: 0
+            matchesPlayed: 0,
+            puntosDisciplinarios: 0
         });
     });
 
-    // Calcular faltas de los partidos
+    // Calcular estadísticas de tarjetas y faltas directamente desde los partidos
     props.matches.forEach(match => {
         // Solo considerar partidos que han comenzado
         if (!match.horaInicioPrimerTiempo || !match.estadisticasPartido) return;
 
-        // Contar faltas por equipo
+        // Acumular faltas y tarjetas de cada equipo en el partido
         match.estadisticasPartido.forEach(stat => {
             const teamStat = teamStats.get(stat.equipoId);
             if (teamStat) {
                 teamStat.fouls += stat.faltas || 0;
+                teamStat.tarjetasRojas += stat.tarjetasRojas || 0;
+                teamStat.tarjetasAzules += stat.tarjetasAzules || 0;
+                teamStat.tarjetasAmarillas += stat.tarjetasAmarillas || 0;
+
+                // Calcular puntos disciplinarios
+                teamStat.puntosDisciplinarios +=
+                    (stat.faltas || 0) * 1 +
+                    (stat.tarjetasAmarillas || 0) * 3 +
+                    (stat.tarjetasAzules || 0) * 8 +
+                    (stat.tarjetasRojas || 0) * 10;
             }
         });
 
@@ -102,23 +114,8 @@ const sortedTeams = computed(() => {
         if (visitorTeam) visitorTeam.matchesPlayed++;
     });
 
-    // Calcular tarjetas basadas en faltas
-    teamStats.forEach(team => {
-        team.tarjetasAmarillas = Math.floor(team.fouls / 3);
-        team.tarjetasAzules = Math.floor(team.fouls / 8);
-        team.tarjetasRojas = Math.floor(team.fouls / 10);
-    });
-
-    // Convertir a array y ordenar por puntos disciplinarios por partido
+    // Convertir a array y ordenar por puntos disciplinarios
     return Array.from(teamStats.values())
-        .sort((a, b) => {
-            const pointsA =
-                (a.tarjetasRojas * 3 + a.tarjetasAzules * 2 + a.tarjetasAmarillas + a.fouls * 0.5) /
-                (a.matchesPlayed || 1);
-            const pointsB =
-                (b.tarjetasRojas * 3 + b.tarjetasAzules * 2 + b.tarjetasAmarillas + b.fouls * 0.5) /
-                (b.matchesPlayed || 1);
-            return pointsB - pointsA;
-        });
+        .sort((a, b) => b.puntosDisciplinarios - a.puntosDisciplinarios);
 });
 </script>

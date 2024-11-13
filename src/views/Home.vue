@@ -96,8 +96,6 @@
 
           </div>
 
-
-
           <!-- Matches Section -->
           <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
             <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
@@ -283,11 +281,7 @@ const getMatchScore = (match: any): string => {
 
 // Tournament-specific data getters
 const getDirtyPlayers = (tournamentId: string) => {
-  const tournamentMatches = matches.value.filter(m => {
-    const phase = phases.value.find(p => p.torneoId === tournamentId);
-    const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-    return m.grupoId === group?.id;
-  });
+  const tournamentMatches = matches.value;
 
   const matchIds = tournamentMatches.map(m => m.id);
   const relevantStats = matchStats.value.filter(s => matchIds.includes(s.partidoId));
@@ -318,17 +312,17 @@ const getDirtyPlayers = (tournamentId: string) => {
     .filter(player => player.tarjetasRojas > 0 || player.tarjetasAzules > 0 ||
       player.tarjetasAmarillas > 0 || player.faltas > 0)
     .sort((a, b) => (
-      (b.tarjetasRojas * 3 + b.tarjetasAzules * 2 + b.tarjetasAmarillas + b.faltas * 0.5) -
-      (a.tarjetasRojas * 3 + a.tarjetasAzules * 2 + a.tarjetasAmarillas + a.faltas * 0.5)
+      (b.tarjetasRojas * 10000 + b.tarjetasAzules * 1000 + b.tarjetasAmarillas * 100 + b.faltas) -
+      (a.tarjetasRojas * 10000 + a.tarjetasAzules * 1000 + a.tarjetasAmarillas * 100 + a.faltas)
     ))
-    .slice(0, 5);
+    .slice(0, 1000);
 };
 
 const getTopScorers = (tournamentId: string) => {
   const tournamentMatches = matches.value.filter(m => {
     const phase = phases.value.find(p => p.torneoId === tournamentId);
     const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-    return m.grupoId === group?.id;
+    return true;
   });
 
   const matchIds = tournamentMatches.map(m => m.id);
@@ -360,7 +354,7 @@ const getTournamentMatches = (tournamentId: string) => {
   return matches.value.filter(m => {
     const phase = phases.value.find(p => p.torneoId === tournamentId);
     const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-    return m.grupoId === group?.id;
+    return true;
   });
 };
 
@@ -374,7 +368,7 @@ const getPreviousMatches = (tournamentId: string) => {
       const group = groups.value.find(g => g.faseTorneoId === phase?.id);
       const matchDate = new Date(m.fechaProgramacion);
       matchDate.setHours(0, 0, 0, 0);
-      return m.grupoId === group?.id && matchDate < today;
+      return true && matchDate < today;
     })
     .sort((a, b) => new Date(b.fechaProgramacion).getTime() - new Date(a.fechaProgramacion).getTime())
     .slice(0, 5);
@@ -401,6 +395,7 @@ const getTournamentPhases = (tournamentId: string) => {
 const getPhaseGroups = (phaseId: string) => {
   return groups.value.filter(g => g.faseTorneoId === phaseId);
 };
+
 const getGroupStats = (groupId: string) => {
   const groupTeamIds = teamGroups.value
     .filter(tg => tg.grupoId === groupId)
