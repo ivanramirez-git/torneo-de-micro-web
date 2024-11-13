@@ -8,14 +8,14 @@
                         <th class="sticky left-0 bg-white pb-2 pl-4 sm:pl-0 w-12">Pos</th>
                         <th class="sticky left-12 bg-white pb-2 w-12 sm:w-auto">Equipo</th>
                         <th class="pb-2 text-center">Pts</th>
+                        <th class="pb-2 text-center">Pts Disc.</th>
+                        <th class="pb-2 text-center">DG</th>
                         <th class="pb-2 text-center">PJ</th>
                         <th class="pb-2 text-center">PG</th>
                         <th class="pb-2 text-center">PE</th>
                         <th class="pb-2 text-center">PP</th>
                         <th class="pb-2 text-center">GF</th>
                         <th class="pb-2 text-center">GC</th>
-                        <th class="pb-2 text-center">DG</th>
-                        <th class="pb-2 text-center">Faltas</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,14 +33,14 @@
                             </div>
                         </td>
                         <td class="py-2 text-center font-bold">{{ stats.points }}</td>
+                        <td class="py-2 text-center">{{ stats.puntosDisciplinarios }}</td>
+                        <td class="py-2 text-center">{{ stats.goalsFor - stats.goalsAgainst }}</td>
                         <td class="py-2 text-center">{{ stats.played }}</td>
                         <td class="py-2 text-center">{{ stats.won }}</td>
                         <td class="py-2 text-center">{{ stats.drawn }}</td>
                         <td class="py-2 text-center">{{ stats.lost }}</td>
                         <td class="py-2 text-center">{{ stats.goalsFor }}</td>
                         <td class="py-2 text-center">{{ stats.goalsAgainst }}</td>
-                        <td class="py-2 text-center">{{ stats.goalsFor - stats.goalsAgainst }}</td>
-                        <td class="py-2 text-center">{{ stats.fouls }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -51,11 +51,10 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 
-// Props
 const props = defineProps<{
-    standings: Array<any>; // Array de estadísticas de los equipos en el grupo
-    groupName: string; // Nombre del grupo
-    getTeamName: (teamId: string) => string; // Función para obtener el nombre del equipo
-    getTeamCrest: (teamId: string) => string; // Función para obtener el escudo del equipo
+    standings: Array<any>;
+    groupName: string;
+    getTeamName: (teamId: string) => string;
+    getTeamCrest: (teamId: string) => string;
 }>();
 </script>

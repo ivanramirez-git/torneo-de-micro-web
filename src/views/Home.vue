@@ -93,8 +93,6 @@
                 </div>
               </div>
             </div>
-
-
           </div>
 
           <!-- Statistics Cards -->
@@ -373,6 +371,7 @@ const getGroupStats = (groupId: string) => {
         goalsFor: 0,
         goalsAgainst: 0,
         fouls: 0,
+        puntosDisciplinarios: 0,
         points: 0
       };
 
@@ -387,9 +386,17 @@ const getGroupStats = (groupId: string) => {
             ?.filter(s => s.equipoId === match.equipoVisitanteId)
             .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
 
-        // Calculate fouls
+        // Calcular puntos disciplinarios
         const teamStats = match.estadisticasPartido?.filter(s => s.equipoId === teamId);
-        stats.fouls += teamStats?.reduce((sum, s) => sum + (s.faltas || 0), 0) || 0;
+        stats.puntosDisciplinarios += teamStats?.reduce(
+          (sum, s) =>
+            sum +
+            (s.faltas || 0) * 1 +
+            (s.tarjetasAmarillas || 0) * 3 +
+            (s.tarjetasAzules || 0) * 8 +
+            (s.tarjetasRojas || 0) * 10,
+          0
+        );
 
         if (isLocal) {
           stats.goalsFor += localGoals;
@@ -422,22 +429,12 @@ const getGroupStats = (groupId: string) => {
       return stats;
     })
     .sort((a, b) => {
-      // First sort by points
+      // Criterios de clasificación
       if (b.points !== a.points) return b.points - a.points;
-
-      // Then by fouls (less fouls is better)
-      if (a.fouls !== b.fouls) return a.fouls - b.fouls;
-
-      // Then by goal difference
-      const goalDiffA = a.goalsFor - a.goalsAgainst;
-      const goalDiffB = b.goalsFor - b.goalsAgainst;
-      if (goalDiffB !== goalDiffA) return goalDiffB - goalDiffA;
-
-      // Finally by goals scored
-      return b.goalsFor - a.goalsFor;
+      if (a.puntosDisciplinarios !== b.puntosDisciplinarios) return a.puntosDisciplinarios - b.puntosDisciplinarios;
+      return b.goalsFor - a.goalsFor; // Más goles es mejor
     });
 };
-
 
 onMounted(loadData);
 </script>
