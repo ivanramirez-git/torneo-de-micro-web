@@ -308,32 +308,27 @@ const getTournamentMatches = (tournamentId: string) => {
     return true;
   });
 };
-
 const getPreviousMatches = (tournamentId: string) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
 
   return matches.value
     .filter(m => {
       const phase = phases.value.find(p => p.torneoId === tournamentId);
       const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-      const matchDate = new Date(m.fechaProgramacion);
-      matchDate.setHours(0, 0, 0, 0);
-      return true && matchDate < today;
+      const matchDateTime = new Date(m.fechaProgramacion);
+      return matchDateTime < now;
     })
     .sort((a, b) => new Date(b.fechaProgramacion).getTime() - new Date(a.fechaProgramacion).getTime())
     .slice(0, 5);
 };
 
 const getUpcomingMatches = (tournamentId: string) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
 
   return matches.value
     .filter(m => {
-      const matchDate = new Date(m.fechaProgramacion);
-      matchDate.setHours(0, 0, 0, 0);
-      return matchDate >= today;
+      const matchDateTime = new Date(m.fechaProgramacion);
+      return matchDateTime >= now;
     })
     .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime())
     .slice(0, 5);
