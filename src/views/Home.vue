@@ -298,7 +298,7 @@ const getTopScorers = (tournamentId: string) => {
     }))
     .filter(player => player.goles > 0)
     .sort((a, b) => b.goles - a.goles)
-    .slice(0, 5);
+    .slice(0, 15);
 };
 
 const getTournamentMatches = (tournamentId: string) => {
@@ -319,7 +319,7 @@ const getPreviousMatches = (tournamentId: string) => {
       return matchDateTime < now;
     })
     .sort((a, b) => new Date(b.fechaProgramacion).getTime() - new Date(a.fechaProgramacion).getTime())
-    .slice(0, 5);
+    .slice(0, 15);
 };
 
 const getUpcomingMatches = (tournamentId: string) => {
@@ -331,7 +331,7 @@ const getUpcomingMatches = (tournamentId: string) => {
       return matchDateTime >= now;
     })
     .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime())
-    .slice(0, 5);
+    .slice(0, 15);
 };
 
 const getTournamentPhases = (tournamentId: string) => {

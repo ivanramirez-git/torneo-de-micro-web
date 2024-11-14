@@ -70,6 +70,6 @@ const sortedPlayers = computed(() => {
     return Array.from(playerStats.values())
         .filter(player => player.mvpCount > 0)
         .sort((a, b) => b.mvpCount - a.mvpCount)
-        .slice(0, 5);
+        .slice(0, 10);
 });
 </script>
