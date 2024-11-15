@@ -91,8 +91,10 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Track visit for all routes
-  await trackVisit();
+  // Validate that the routes are public
+  if (to.meta.public) {
+    await trackVisit();
+  }
 
   // Handle authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
