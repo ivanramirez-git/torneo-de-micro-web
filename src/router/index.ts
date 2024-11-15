@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { trackVisit } from '../middleware/visitTracker';
 
 const routes = [
   {
@@ -87,9 +88,13 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
+  // Track visit for all routes
+  await trackVisit();
+
+  // Handle authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login');
   } else {

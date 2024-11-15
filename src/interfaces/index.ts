@@ -98,3 +98,10 @@ export interface Penalty extends BaseEntity {
   gol: boolean;
   partidoId: string;
 }
+
+export interface Visit extends BaseEntity {
+  ruta: string;
+  fechaHora: string;
+  userAgent: string;
+  ip: string;
+}
