@@ -308,31 +308,47 @@ const getTournamentMatches = (tournamentId: string) => {
     return true;
   });
 };
-const getPreviousMatches = (tournamentId: string) => {
+
+
+
+const getMatchStatus = (match: Match): string => {
   const now = new Date();
+  const matchDateTime = new Date(match.fechaProgramacion);
+  const matchTime = new Date(match.horaProgramacion);
+
+  if (matchDateTime > now || (matchDateTime.toDateString() === now.toDateString() && matchTime > now)) {
+    return 'Upcoming';
+  } else if (match.horaInicioPrimerTiempo && !match.horaFinPartido) {
+    return 'Ongoing';
+  } else if (match.horaFinPartido) {
+    return 'Finished';
+  } else {
+    return 'Scheduled';
+  }
+};
+
+const getPreviousMatches = (tournamentId: string) => {
 
   return matches.value
     .filter(m => {
       const phase = phases.value.find(p => p.torneoId === tournamentId);
-      const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-      const matchDateTime = new Date(m.fechaProgramacion);
-      return matchDateTime < now;
+      return getMatchStatus(m) === 'Finished';
     })
     .sort((a, b) => new Date(b.fechaProgramacion).getTime() - new Date(a.fechaProgramacion).getTime())
     .slice(0, 15);
 };
 
 const getUpcomingMatches = (tournamentId: string) => {
-  const now = new Date();
 
   return matches.value
     .filter(m => {
-      const matchDateTime = new Date(m.fechaProgramacion);
-      return matchDateTime >= now;
+      const phase = phases.value.find(p => p.torneoId === tournamentId);
+      return (getMatchStatus(m) === 'Upcoming' || getMatchStatus(m) === 'Ongoing' || getMatchStatus(m) === 'Scheduled');
     })
     .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime())
     .slice(0, 15);
 };
+
 
 const getTournamentPhases = (tournamentId: string) => {
   return phases.value.filter(p => p.torneoId === tournamentId);
