@@ -20,7 +20,7 @@
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <GroupStandingsTable v-for="group in getPhaseGroups(phase.id)" :key="group.id" :groupName="group.nombre"
                   :standings="getGroupStats(group.id)" :getTeamName="getTeamName" :getTeamCrest="getTeamCrest"
-                  :players="players" :matchStats="matchStats" />
+                  :players="players" :matchStats="matchStats" :matches="matches" />
               </div>
             </div>
           </div>

@@ -6,7 +6,6 @@
                 <thead>
                     <tr class="text-left text-sm">
                         <th class="sticky left-0 bg-white pb-2 pl-4 sm:pl-0 w-12">Pos</th>
-                        <th class="pb-2 text-center">Detalles</th>
                         <th class="sticky left-12 bg-white pb-2 w-12 sm:w-auto">Equipo</th>
                         <th class="pb-2 text-center">Pts</th>
                         <th class="pb-2 text-center">PJ</th>
@@ -27,21 +26,18 @@
                                 class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500 w-12 text-center">
                                 {{ index + 1 }}
                             </td>
-                            <td class="py-2 text-center">
+
+                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
                                 <button @click="togglePlayerStats(stats.teamId)"
                                     class="p-2 rounded-full hover:bg-gray-200 transition-colors">
-                                    <i class="pi"
-                                        :class="[expandedTeams.includes(stats.teamId) ? 'pi-chevron-up' : 'pi-chevron-down']"></i>
+                                    <div class="flex items-center">
+                                        <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
+                                            :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
+                                        <span class="hidden sm:inline ml-2 truncate max-w-xs">
+                                            {{ getTeamName(stats.teamId) }}
+                                        </span>
+                                    </div>
                                 </button>
-                            </td>
-                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
-                                <div class="flex items-center">
-                                    <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
-                                        :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
-                                    <span class="hidden sm:inline ml-2 truncate max-w-xs">
-                                        {{ getTeamName(stats.teamId) }}
-                                    </span>
-                                </div>
                             </td>
                             <td class="py-2 text-center font-bold">{{ stats.points }}</td>
                             <td class="py-2 text-center">{{ stats.played }}</td>
@@ -60,27 +56,25 @@
                                     <table class="w-full">
                                         <thead>
                                             <tr class="text-sm text-gray-600">
-                                                <th class="text-left py-2">#</th>
                                                 <th class="text-left py-2">Jugador</th>
-                                                <th class="text-center py-2">⚽ Goles</th>
-                                                <th class="text-center py-2">🛑 Faltas</th>
-                                                <th class="text-center py-2">🟨 Amarillas</th>
-                                                <th class="text-center py-2">🟦 Azules</th>
-                                                <th class="text-center py-2">🟥 Rojas</th>
-                                                <th class="text-center py-2">🏆 MVP</th>
+                                                <th class="text-center py-2">⚽ </th>
+                                                <th class="text-center py-2">🏆 </th>
+                                                <th class="text-center py-2">🟥 </th>
+                                                <th class="text-center py-2">🟦 </th>
+                                                <th class="text-center py-2">🟨 </th>
+                                                <th class="text-center py-2">🛑 </th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr v-for="player in getTeamPlayers(stats.teamId)" :key="player.id"
                                                 class="border-t border-gray-200">
-                                                <td class="py-2">{{ player.numero }}</td>
                                                 <td class="py-2">{{ player.nombre }}</td>
                                                 <td class="text-center py-2">{{ player.stats.goles }}</td>
-                                                <td class="text-center py-2">{{ player.stats.faltas }}</td>
-                                                <td class="text-center py-2">{{ player.stats.tarjetasAmarillas }}</td>
-                                                <td class="text-center py-2">{{ player.stats.tarjetasAzules }}</td>
-                                                <td class="text-center py-2">{{ player.stats.tarjetasRojas }}</td>
                                                 <td class="text-center py-2">{{ player.stats.mvp }}</td>
+                                                <td class="text-center py-2">{{ player.stats.tarjetasRojas }}</td>
+                                                <td class="text-center py-2">{{ player.stats.tarjetasAzules }}</td>
+                                                <td class="text-center py-2">{{ player.stats.tarjetasAmarillas }}</td>
+                                                <td class="text-center py-2">{{ player.stats.faltas }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -121,14 +115,27 @@ const togglePlayerStats = (teamId: string) => {
 
 // Contar MVPs de un jugador en un equipo
 const getPlayerMvpCount = (playerId: string, teamId: string): number => {
-    if (!props.matches) return 0;
 
-    return props.matches.filter(match => {
+    if (!props.matches || props.matches.length === 0) return 0;
+
+    return props.matches.reduce((count, match) => {
         const isMvpLocal = match.mvpEquipoLocalId === playerId && match.equipoLocalId === teamId;
         const isMvpVisitor = match.mvpEquipoVisitanteId === playerId && match.equipoVisitanteId === teamId;
-        return isMvpLocal || isMvpVisitor;
-    }).length;
+
+        console.log({
+            match,
+            isMvpLocal,
+            isMvpVisitor,
+            playerId,
+            teamId,
+            count: count + (isMvpLocal || isMvpVisitor ? 1 : 0)
+        });
+
+        return count + (isMvpLocal || isMvpVisitor ? 1 : 0);
+    }, 0);
+
 };
+
 
 // Obtener jugadores del equipo con estadísticas
 const getTeamPlayers = (teamId: string) => {
