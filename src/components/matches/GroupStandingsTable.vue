@@ -21,23 +21,20 @@
                 <tbody>
                     <template v-for="(stats, index) in standings" :key="stats.teamId">
                         <!-- Team Row -->
-                        <tr class="border-t hover:bg-gray-50">
+                        <tr @click="togglePlayerStats(stats.teamId)" class="border-t hover:bg-gray-50 cursor-pointer">
                             <td
                                 class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500 w-12 text-center">
                                 {{ index + 1 }}
                             </td>
 
                             <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
-                                <button @click="togglePlayerStats(stats.teamId)"
-                                    class="p-2 rounded-full hover:bg-gray-200 transition-colors">
-                                    <div class="flex items-center">
-                                        <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
-                                            :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
-                                        <span class="hidden sm:inline ml-2 truncate max-w-xs">
-                                            {{ getTeamName(stats.teamId) }}
-                                        </span>
-                                    </div>
-                                </button>
+                                <div class="flex items-center">
+                                    <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
+                                        :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
+                                    <span class="hidden sm:inline ml-2 truncate max-w-xs">
+                                        {{ getTeamName(stats.teamId) }}
+                                    </span>
+                                </div>
                             </td>
                             <td class="py-2 text-center font-bold">{{ stats.points }}</td>
                             <td class="py-2 text-center">{{ stats.played }}</td>
@@ -50,43 +47,67 @@
                             <td class="py-2 text-center">{{ stats.puntosDisciplinarios }}</td>
                         </tr>
                         <!-- Player Stats Row -->
-                        <tr v-if="expandedTeams.includes(stats.teamId)" class="bg-gray-50">
-                            <td colspan="12" class="py-4 px-4">
-                                <div class="overflow-x-auto">
-                                    <table class="w-full">
-                                        <thead>
-                                            <tr class="text-sm text-gray-600">
-                                                <th class="text-left py-2">Jugador</th>
-                                                <th class="text-center py-2">⚽ </th>
-                                                <th class="text-center py-2">🏆 </th>
-                                                <th class="text-center py-2">🟥 </th>
-                                                <th class="text-center py-2">🟦 </th>
-                                                <th class="text-center py-2">🟨 </th>
-                                                <th class="text-center py-2">🛑 </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="player in getTeamPlayers(stats.teamId)" :key="player.id"
-                                                class="border-t border-gray-200">
-                                                <td class="py-2">{{ player.nombre }}</td>
-                                                <td class="text-center py-2">{{ player.stats.goles }}</td>
-                                                <td class="text-center py-2">{{ player.stats.mvp }}</td>
-                                                <td class="text-center py-2">{{ player.stats.tarjetasRojas }}</td>
-                                                <td class="text-center py-2">{{ player.stats.tarjetasAzules }}</td>
-                                                <td class="text-center py-2">{{ player.stats.tarjetasAmarillas }}</td>
-                                                <td class="text-center py-2">{{ player.stats.faltas }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-                        </tr>
+                        <transition name="fade" mode="out-in">
+                            <tr v-if="expandedTeams.includes(stats.teamId)" class="bg-gray-50">
+                                <td colspan="12" class="py-4 px-4">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full">
+                                            <thead>
+                                                <tr class="text-sm text-gray-600">
+                                                    <th class="text-left py-2">Jugador</th>
+                                                    <th class="text-center py-2">⚽ </th>
+                                                    <th class="text-center py-2">🏆 </th>
+                                                    <th class="text-center py-2">🟥 </th>
+                                                    <th class="text-center py-2">🟦 </th>
+                                                    <th class="text-center py-2">🟨 </th>
+                                                    <th class="text-center py-2">🛑 </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="player in getTeamPlayers(stats.teamId)" :key="player.id"
+                                                    class="border-t border-gray-200">
+                                                    <td class="py-2">{{ player.nombre }}</td>
+                                                    <td class="text-center py-2">{{ player.stats.goles }}</td>
+                                                    <td class="text-center py-2">{{ player.stats.mvp }}</td>
+                                                    <td class="text-center py-2">{{ player.stats.tarjetasRojas }}</td>
+                                                    <td class="text-center py-2">{{ player.stats.tarjetasAzules }}</td>
+                                                    <td class="text-center py-2">{{ player.stats.tarjetasAmarillas }}
+                                                    </td>
+                                                    <td class="text-center py-2">{{ player.stats.faltas }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </transition>
                     </template>
                 </tbody>
             </table>
         </div>
     </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    height: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+    opacity: 1;
+    height: auto;
+}
+</style>
+
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Player, Match } from '../../interfaces';
