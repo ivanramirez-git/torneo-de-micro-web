@@ -90,9 +90,6 @@ let props = defineProps<{
     isActive: boolean;
 }>();
 
-console.log('match', props.match);
-console.log('team', props.team);
-
 defineEmits<{
     (e: 'goal', data: { player: Player; team: Team }): void;
     (e: 'foul', data: { player: Player; team: Team }): void;

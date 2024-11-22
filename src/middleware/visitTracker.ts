@@ -1,5 +1,4 @@
 import api from '../stores/api';
-import { RouteLocationNormalized } from 'vue-router';
 
 export async function trackVisit() {
     try {

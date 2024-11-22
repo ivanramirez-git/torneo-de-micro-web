@@ -688,7 +688,6 @@ const showGoalDialog = () => {
 };
 
 const saveGoal = async () => {
-  console.log('Adding goal 2:');
 
   try {
     await api.post(`/partidos/${match.value.id}/estadistica-partidos`, {

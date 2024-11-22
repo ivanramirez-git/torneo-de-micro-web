@@ -15,9 +15,6 @@ const props = defineProps<{
     teams?: Team[];
 }>();
 
-console.log('match', props.match);
-console.log('teams', props.teams);
-
 const formatDate = (date: Date | string): string => {
     return new Date(date).toLocaleDateString();
 };

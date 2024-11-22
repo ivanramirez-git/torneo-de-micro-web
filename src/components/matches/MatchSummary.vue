@@ -16,8 +16,6 @@ const props = defineProps<{
     teams: Team[];
 }>();
 
-console.log('MatchStatistics', props.match, props.teams);
-
 const getTeamName = (teamId?: string): string => {
     if (!teamId) return '';
     const team = props.teams.find(t => t.id === teamId);
@@ -25,18 +23,6 @@ const getTeamName = (teamId?: string): string => {
 };
 
 
-
-// export interface MatchStatistics extends BaseEntity {
-//   goles: number;
-//   faltas: number;
-//   sanciones?: string;
-//   tarjetasAzules: number;
-//   tarjetasAmarillas: number;
-//   tarjetasRojas: number;
-//   partidoId: string;
-//   jugadorId: string;
-//   equipoId: string;
-// }
 const getTeamStats = (teamId?: string): MatchStatistics | undefined => {
     if (!teamId) return undefined;
     let todasEstadisticas: MatchStatistics[] = props.match?.estadisticasPartido;

@@ -312,7 +312,6 @@ const requestTime = async (team: Team) => {
 };
 
 const addGoal = async ({ player, team }) => {
-    console.log('Adding goal:', player);
     try {
         await api.post(`/partidos/${match.value?.id}/estadistica-partidos`, {
             equipoId: team.id,
@@ -336,7 +335,6 @@ const addGoal = async ({ player, team }) => {
 };
 
 const addFoul = async ({ player, team }) => {
-    console.log('Adding foul:', player);
     try {
         await api.post(`/partidos/${match.value?.id}/estadistica-partidos`, {
             equipoId: team.id,
@@ -360,7 +358,6 @@ const addFoul = async ({ player, team }) => {
 };
 
 const saveCard = async ({ player, team, type }) => {
-    console.log('Saving card:', player, type);
     try {
         const update: any = {
             equipoId: team.id,

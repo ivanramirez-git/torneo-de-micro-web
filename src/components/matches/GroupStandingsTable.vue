@@ -142,16 +142,6 @@ const getPlayerMvpCount = (playerId: string, teamId: string): number => {
     return props.matches.reduce((count, match) => {
         const isMvpLocal = match.mvpEquipoLocalId === playerId && match.equipoLocalId === teamId;
         const isMvpVisitor = match.mvpEquipoVisitanteId === playerId && match.equipoVisitanteId === teamId;
-
-        console.log({
-            match,
-            isMvpLocal,
-            isMvpVisitor,
-            playerId,
-            teamId,
-            count: count + (isMvpLocal || isMvpVisitor ? 1 : 0)
-        });
-
         return count + (isMvpLocal || isMvpVisitor ? 1 : 0);
     }, 0);
 

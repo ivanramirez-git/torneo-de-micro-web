@@ -11,15 +11,19 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value);
 
   const login = async (email: string, password: string) => {
+
     try {
       const response = await axios.post('https://api-micro.freeloz.com/users/login', {
         email,
         password
       });
-      
+
       token.value = response.data.token;
       localStorage.setItem('token', response.data.token);
-      
+
+      const vamos = localStorage.getItem('token');
+      vamos;
+
       router.push('/admin');
       return true;
     } catch (error) {
