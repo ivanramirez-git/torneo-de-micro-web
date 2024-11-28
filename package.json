@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/ackee-tracker": "^5.0.4",
     "@vueuse/core": "^10.7.0",
     "ackee-tracker": "^5.1.0",
     "axios": "^1.6.2",
