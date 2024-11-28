@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { trackUserEvent } from '../utils/analytics/userAnalytics';
 
 const authStore = useAuthStore();
 
@@ -54,9 +55,13 @@ const handleLogin = async () => {
     const success = await authStore.login(email.value, password.value);
     if (!success) {
       error.value = 'Credenciales inválidas';
+      trackUserEvent.login(false, 'Invalid credentials');
+    } else {
+      trackUserEvent.login(true);
     }
   } catch (e) {
     error.value = 'Error al iniciar sesión';
+    trackUserEvent.login(false, 'Login error');
   } finally {
     loading.value = false;
   }
