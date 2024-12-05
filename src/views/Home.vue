@@ -53,7 +53,6 @@
             <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
 
             <!-- Upcoming Matches -->
-
             <div class="mb-6">
               <h4 class="text-md font-medium mb-3">Próximos Partidos</h4>
               <div class="space-y-4">
@@ -101,10 +100,12 @@
 
 
             <!-- Least Scored Against -->
-            <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
+            <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)"
+              :teams="getTeamsByTournament(tournament.id)" />
 
             <!-- Team Fouls Card -->
-            <TeamFoulsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" />
+            <TeamFoulsCard :matches="getTournamentMatches(tournament.id)"
+              :teams="getTeamsByTournament(tournament.id)" />
           </div>
 
           <!-- Dirty Players -->
@@ -232,7 +233,13 @@ const getMatchScore = (match: any): string => {
 
 // Tournament-specific data getters
 const getDirtyPlayers = (tournamentId: string) => {
-  const tournamentMatches = matches.value;
+
+
+  const tournamentMatches = matches.value.filter(m => {
+    const phase = phases.value.find(p => p.torneoId === tournamentId);
+    const group = groups.value.find(g => g.faseTorneoId === phase?.id);
+    return tournamentId === phase?.torneoId;
+  });
 
   const matchIds = tournamentMatches.map(m => m.id);
   const relevantStats = matchStats.value.filter(s => matchIds.includes(s.partidoId));
@@ -249,6 +256,7 @@ const getDirtyPlayers = (tournamentId: string) => {
         faltas: 0
       };
     }
+
     playerStats[stat.jugadorId].tarjetasRojas += stat.tarjetasRojas || 0;
     playerStats[stat.jugadorId].tarjetasAzules += stat.tarjetasAzules || 0;
     playerStats[stat.jugadorId].tarjetasAmarillas += stat.tarjetasAmarillas || 0;
@@ -273,7 +281,7 @@ const getTopScorers = (tournamentId: string) => {
   const tournamentMatches = matches.value.filter(m => {
     const phase = phases.value.find(p => p.torneoId === tournamentId);
     const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-    return true;
+    return tournamentId === phase?.torneoId;
   });
 
   const matchIds = tournamentMatches.map(m => m.id);
@@ -305,8 +313,12 @@ const getTournamentMatches = (tournamentId: string) => {
   return matches.value.filter(m => {
     const phase = phases.value.find(p => p.torneoId === tournamentId);
     const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-    return true;
+    return tournamentId === phase?.torneoId;
   });
+};
+
+const getTeamsByTournament = (tournamentId: string) => {
+  return teams.value.filter(t => t.torneoId === tournamentId);
 };
 
 
@@ -332,6 +344,7 @@ const getPreviousMatches = (tournamentId: string) => {
   return matches.value
     .filter(m => {
       const phase = phases.value.find(p => p.torneoId === tournamentId);
+      if (tournamentId !== phase?.torneoId) return false;
       return getMatchStatus(m) === 'Finished';
     })
     .sort((a, b) => new Date(b.fechaProgramacion).getTime() - new Date(a.fechaProgramacion).getTime())
@@ -343,6 +356,7 @@ const getUpcomingMatches = (tournamentId: string) => {
   return matches.value
     .filter(m => {
       const phase = phases.value.find(p => p.torneoId === tournamentId);
+      if (tournamentId !== phase?.torneoId) return false;
       return (getMatchStatus(m) === 'Upcoming' || getMatchStatus(m) === 'Ongoing' || getMatchStatus(m) === 'Scheduled');
     })
     .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime())
@@ -357,6 +371,7 @@ const getTournamentPhases = (tournamentId: string) => {
 const getPhaseGroups = (phaseId: string) => {
   return groups.value.filter(g => g.faseTorneoId === phaseId);
 };
+
 const getGroupStats = (groupId: string) => {
   const groupTeamIds = teamGroups.value
     .filter(tg => tg.grupoId === groupId)
