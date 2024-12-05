@@ -2,88 +2,97 @@
   <div class="p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Gestión de Equipos</h1>
-      <Button
-        label="Nuevo Equipo"
-        icon="pi pi-plus"
-        @click="openDialog()"
-        class="p-button-primary"
-      />
+      <div class="flex gap-4">
+        <Dropdown
+          v-model="selectedTournament"
+          :options="tournaments"
+          optionLabel="nombre"
+          placeholder="Seleccionar torneo"
+          class="w-64"
+          @change="loadTeams"
+        />
+        <Button 
+          label="Nuevo Equipo" 
+          icon="pi pi-plus" 
+          @click="openDialog()" 
+          class="p-button-primary"
+          :disabled="!selectedTournament"
+        />
+      </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
-      <DataTable 
-        :value="teams" 
-        :loading="loading"
-        dataKey="id"
-        paginator
-        :rows="10"
-        :rowsPerPageOptions="[10, 20, 50]"
-        filterDisplay="menu"
-        :filters="filters"
-        class="p-datatable-lg"
-      >
-        <Column field="nombre" header="Nombre" sortable>
-          <template #body="slotProps">
-            <div class="flex items-center">
-              <img 
-                v-if="slotProps.data.escudoUrl" 
-                :src="slotProps.data.escudoUrl" 
-                :alt="slotProps.data.nombre"
-                class="w-8 h-8 mr-2 object-contain"
-              />
-              {{ slotProps.data.nombre }}
-            </div>
-          </template>
-          <template #filter="{ filterModel, filterCallback }">
-            <InputText v-model="filterModel.value" @input="filterCallback()" />
-          </template>
-        </Column>
-        <Column field="color" header="Color" sortable>
-          <template #body="slotProps">
-            <div class="flex items-center">
-                <div class="w-6 h-6 rounded-full border border-gray-200" :style="{ backgroundColor: '#' + slotProps.data.color }"></div>
-            </div>
-          </template>
-          <template #filter="{ filterModel, filterCallback }">
-            <InputText v-model="filterModel.value" @input="filterCallback()" />
-          </template>
-        </Column>
-        <Column field="escudoUrl" header="Escudo" sortable>
-          <template #body="slotProps">
+    <DataTable 
+      :value="teams" 
+      :loading="loading"
+      dataKey="id"
+      paginator
+      :rows="10"
+      :rowsPerPageOptions="[10, 20, 50]"
+      filterDisplay="menu"
+      :filters="filters"
+      class="p-datatable-lg"
+    >
+      <Column field="nombre" header="Nombre" sortable>
+        <template #body="slotProps">
+          <div class="flex items-center">
             <img 
               v-if="slotProps.data.escudoUrl" 
               :src="slotProps.data.escudoUrl" 
               :alt="slotProps.data.nombre"
-              class="w-12 h-12 object-contain"
+              class="w-8 h-8 mr-2 object-contain"
             />
-            <span v-else class="text-gray-400">Sin escudo</span>
-          </template>
-        </Column>
-        <Column field="createdAt" header="Fecha Creación" sortable>
-          <template #body="slotProps">
-            {{ new Date(slotProps.data.createdAt).toLocaleDateString() }}
-          </template>
-        </Column>
-        <Column header="Acciones" :exportable="false" style="min-width:8rem">
-          <template #body="slotProps">
-            <div class="flex gap-2">
-              <Button 
-                icon="pi pi-pencil" 
-                @click="editTeam(slotProps.data)"
-                class="p-button-text p-button-warning"
-                tooltip="Editar"
-              />
-              <Button 
-                icon="pi pi-trash" 
-                @click="confirmDelete(slotProps.data)"
-                class="p-button-text p-button-danger"
-                tooltip="Eliminar"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
-    </div>
+            {{ slotProps.data.nombre }}
+          </div>
+        </template>
+        <template #filter="{ filterModel, filterCallback }">
+          <InputText v-model="filterModel.value" @input="filterCallback()" />
+        </template>
+      </Column>
+      <Column field="color" header="Color" sortable>
+        <template #body="slotProps">
+          <div class="flex items-center">
+              <div class="w-6 h-6 rounded-full border border-gray-200" :style="{ backgroundColor: '#' + slotProps.data.color }"></div>
+          </div>
+        </template>
+        <template #filter="{ filterModel, filterCallback }">
+          <InputText v-model="filterModel.value" @input="filterCallback()" />
+        </template>
+      </Column>
+      <Column field="escudoUrl" header="Escudo" sortable>
+        <template #body="slotProps">
+          <img 
+            v-if="slotProps.data.escudoUrl" 
+            :src="slotProps.data.escudoUrl" 
+            :alt="slotProps.data.nombre"
+            class="w-12 h-12 object-contain"
+          />
+          <span v-else class="text-gray-400">Sin escudo</span>
+        </template>
+      </Column>
+      <Column field="createdAt" header="Fecha Creación" sortable>
+        <template #body="slotProps">
+          {{ new Date(slotProps.data.createdAt).toLocaleDateString() }}
+        </template>
+      </Column>
+      <Column header="Acciones" :exportable="false" style="min-width:8rem">
+        <template #body="slotProps">
+          <div class="flex gap-2">
+            <Button 
+              icon="pi pi-pencil" 
+              @click="editTeam(slotProps.data)"
+              class="p-button-text p-button-warning"
+              tooltip="Editar"
+            />
+            <Button 
+              icon="pi pi-trash" 
+              @click="confirmDelete(slotProps.data)"
+              class="p-button-text p-button-danger"
+              tooltip="Eliminar"
+            />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
 
     <!-- Dialog para agregar/editar equipo -->
     <Dialog 
@@ -161,17 +170,20 @@ import api from '../../stores/api';
 // Components
 import Button from 'primevue/button';
 import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
 import DataTable from 'primevue/datatable';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import ColorPicker from 'primevue/colorpicker';
 import Toast from 'primevue/toast';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Dropdown from 'primevue/dropdown';
 
 const confirm = useConfirm();
 const toast = useToast();
 
 // State
+const tournaments = ref([]);
+const selectedTournament = ref(null);
 const teams = ref([]);
 const loading = ref(true);
 const dialogVisible = ref(false);
@@ -187,14 +199,42 @@ const filters = ref({
 const teamForm = ref({
   nombre: '',
   color: '#000000',
-  escudoUrl: ''
+  escudoUrl: '',
+  torneoId: ''
 });
 
 // Methods
+const loadTournaments = async () => {
+  try {
+    const response = await api.get('/torneos');
+    tournaments.value = response.data;
+  } catch (error) {
+    console.error('Error loading tournaments:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudieron cargar los torneos'
+    });
+  }
+};
+
 const loadTeams = async () => {
+  if (!selectedTournament.value) {
+    teams.value = [];
+    return;
+  }
+
   try {
     loading.value = true;
-    const response = await api.get('/equipos');
+    const response = await api.get('/equipos', {
+      params: {
+        filter: {
+          where: {
+            torneoId: selectedTournament.value.id
+          }
+        }
+      }
+    });
     teams.value = response.data;
   } catch (error) {
     console.error('Error loading teams:', error);
@@ -213,7 +253,8 @@ const openDialog = () => {
   teamForm.value = {
     nombre: '',
     color: '#000000',
-    escudoUrl: ''
+    escudoUrl: '',
+    torneoId: selectedTournament.value.id
   };
   dialogVisible.value = true;
 };
@@ -223,7 +264,8 @@ const closeDialog = () => {
   teamForm.value = {
     nombre: '',
     color: '#000000',
-    escudoUrl: ''
+    escudoUrl: '',
+    torneoId: selectedTournament.value?.id || ''
   };
 };
 
@@ -313,5 +355,7 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
-onMounted(loadTeams);
+onMounted(async () => {
+  await loadTournaments();
+});
 </script>

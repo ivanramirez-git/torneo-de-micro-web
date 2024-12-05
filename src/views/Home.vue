@@ -18,16 +18,15 @@
 
               <!-- Groups in Phase -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <GroupStandingsTable v-for="group in getPhaseGroups(phase.id)" :key="group.id" :groupName="group.nombre"
+                <GroupStandingsTable v-for="group in getPhaseGroups(phase.id)" :key="group.id" :group="group"
                   :standings="getGroupStats(group.id)" :getTeamName="getTeamName" :getTeamCrest="getTeamCrest"
-                  :players="players" :matchStats="matchStats" :matches="matches" />
+                  :players="players" :matchStats="matchStats" :matches="matches" :phase="phase" />
               </div>
             </div>
           </div>
 
           <!-- Statistics Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-6">
             <!-- Top Scorers -->
             <div class="bg-white rounded-lg shadow p-4 sm:p-6">
               <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
@@ -358,7 +357,6 @@ const getTournamentPhases = (tournamentId: string) => {
 const getPhaseGroups = (phaseId: string) => {
   return groups.value.filter(g => g.faseTorneoId === phaseId);
 };
-
 const getGroupStats = (groupId: string) => {
   const groupTeamIds = teamGroups.value
     .filter(tg => tg.grupoId === groupId)
@@ -368,7 +366,39 @@ const getGroupStats = (groupId: string) => {
     m => m.grupoId === groupId && m.horaInicioPrimerTiempo
   );
 
-  return groupTeamIds
+  // Precalcular puntos disciplinarios para todos los equipos
+  const disciplinaryPointsMap: { [teamId: string]: number } = {};
+
+  teamGroups.value.forEach(tg => {
+    const teamId = tg.equipoId;
+
+    // Obtener todas las coincidencias del equipo en todo el torneo
+    const allTeamMatches = matches.value.filter(
+      m => m.horaInicioPrimerTiempo && (m.equipoLocalId === teamId || m.equipoVisitanteId === teamId)
+    );
+
+    // Calcular puntos disciplinarios totales
+    let totalDisciplinaryPoints = 0;
+
+    allTeamMatches.forEach((match: Match) => {
+      const teamStats = match.estadisticasPartido?.filter(s => s.equipoId === teamId);
+      if (teamStats) {
+        totalDisciplinaryPoints += teamStats.reduce(
+          (sum, s) =>
+            sum +
+            (s.faltas || 0) * 1 +
+            (s.tarjetasAmarillas || 0) * 3 +
+            (s.tarjetasAzules || 0) * 8 +
+            (s.tarjetasRojas || 0) * 10,
+          0
+        );
+      }
+    });
+
+    disciplinaryPointsMap[teamId] = totalDisciplinaryPoints;
+  });
+
+  const groupTeamStats = groupTeamIds
     .map(teamId => {
       const teamMatches = groupMatches.filter(
         m => m.equipoLocalId === teamId || m.equipoVisitanteId === teamId
@@ -383,7 +413,7 @@ const getGroupStats = (groupId: string) => {
         goalsFor: 0,
         goalsAgainst: 0,
         fouls: 0,
-        puntosDisciplinarios: 0,
+        puntosDisciplinarios: disciplinaryPointsMap[teamId] || 0, // Asignar puntos disciplinarios totales
         points: 0
       };
 
@@ -397,18 +427,6 @@ const getGroupStats = (groupId: string) => {
           match.estadisticasPartido
             ?.filter(s => s.equipoId === match.equipoVisitanteId)
             .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
-
-        // Calcular puntos disciplinarios
-        const teamStats = match.estadisticasPartido?.filter(s => s.equipoId === teamId);
-        stats.puntosDisciplinarios += teamStats?.reduce(
-          (sum, s) =>
-            sum +
-            (s.faltas || 0) * 1 +
-            (s.tarjetasAmarillas || 0) * 3 +
-            (s.tarjetasAzules || 0) * 8 +
-            (s.tarjetasRojas || 0) * 10,
-          0
-        );
 
         if (isLocal) {
           stats.goalsFor += localGoals;
@@ -446,7 +464,10 @@ const getGroupStats = (groupId: string) => {
       if (a.puntosDisciplinarios !== b.puntosDisciplinarios) return a.puntosDisciplinarios - b.puntosDisciplinarios;
       return b.goalsFor - a.goalsFor; // Más goles es mejor
     });
+
+  return groupTeamStats;
 };
+
 
 onMounted(loadData);
 </script>

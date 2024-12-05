@@ -21,13 +21,12 @@
                 <tbody>
                     <template v-for="(stats, index) in standings" :key="stats.teamId">
                         <!-- Team Row -->
-                        <tr @click="togglePlayerStats(stats.teamId)" class="border-t hover:bg-gray-50 cursor-pointer">
+                        <tr @click="togglePlayerStats(stats.teamId)" :class="getRowClass(index)" class="group">
                             <td
-                                class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500 w-12 text-center">
+                                class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500 w-12 text-center group-hover:bg-gray-50">
                                 {{ index + 1 }}
                             </td>
-
-                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
+                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto group-hover:bg-gray-50">
                                 <div class="flex items-center">
                                     <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
                                         :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
@@ -48,7 +47,7 @@
                         </tr>
                         <!-- Player Stats Row -->
                         <transition name="fade" mode="out-in">
-                            <tr v-if="expandedTeams.includes(stats.teamId)" class="bg-gray-50">
+                            <tr v-if="expandedTeams.includes(stats.teamId)" :class="getRowClass(index)">
                                 <td colspan="12" class="py-4 px-4">
                                     <div class="overflow-x-auto">
                                         <table class="w-full">
@@ -87,7 +86,6 @@
         </div>
     </div>
 </template>
-
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
@@ -107,14 +105,14 @@
 }
 </style>
 
-
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Player, Match } from '../../interfaces';
+import { ref, computed } from 'vue';
+import type { Player, Match, Group, TournamentPhase } from '../../interfaces';
 
 const props = defineProps<{
     standings: Array<any>;
-    groupName: string;
+    phase: TournamentPhase;
+    group: Group;
     getTeamName: (teamId: string) => string;
     getTeamCrest: (teamId: string) => string;
     players?: Player[];
@@ -122,9 +120,88 @@ const props = defineProps<{
     matches?: Match[];
 }>();
 
+const groupName = props.group.nombre;
+const numberOfQualifiedTeams = props.phase.equiposClasificadosPorGrupo;
 const expandedTeams = ref<string[]>([]);
 
-// Función para expandir/colapsar filas de detalles
+// Calculate total matches per team
+const totalMatchesPerTeam = computed(() => {
+    return props.standings.length - 1;
+});
+
+// Calculate if a team is mathematically eliminated or qualified
+const getTeamStatus = (currentTeamIndex: number) => {
+    const currentTeam = props.standings[currentTeamIndex];
+    const totalTeamMatches = totalMatchesPerTeam.value;
+
+    if (currentTeam.played === totalTeamMatches) {
+        // Team has played all matches, determine final position
+        // Sort teams by points
+        const sortedTeams = [...props.standings].sort((a, b) => b.points - a.points);
+        const teamPosition = sortedTeams.findIndex(team => team.teamId === currentTeam.teamId) + 1;
+
+        if (teamPosition <= numberOfQualifiedTeams) {
+            return 'qualified';
+        } else {
+            return 'eliminated';
+        }
+    }
+
+    const remainingMatches = totalTeamMatches - currentTeam.played;
+    const maxPossiblePoints = currentTeam.points + (remainingMatches * 3);
+
+    // Sort teams by points to find qualification threshold
+    const sortedTeams = [...props.standings].sort((a, b) => b.points - a.points);
+    const qualificationThreshold = sortedTeams[numberOfQualifiedTeams - 1]?.points || 0;
+
+    // Check if mathematically eliminated
+    let teamsAbove = 0;
+    let guaranteedBetter = 0;
+
+    props.standings.forEach((team, index) => {
+        if (index !== currentTeamIndex) {
+            const teamRemainingMatches = totalTeamMatches - team.played;
+            const teamMaxPoints = team.points + (teamRemainingMatches * 3);
+
+            if (team.points > maxPossiblePoints) {
+                guaranteedBetter++;
+            }
+            if (team.points > currentTeam.points) {
+                teamsAbove++;
+            }
+        }
+    });
+
+    // Eliminated if too many teams are guaranteed to finish with more points
+    if (guaranteedBetter >= numberOfQualifiedTeams) {
+        return 'eliminated';
+    }
+
+    // Calculate minimum guaranteed position
+    const guaranteedPosition = teamsAbove + 1;
+    if (guaranteedPosition <= numberOfQualifiedTeams && currentTeam.points > qualificationThreshold) {
+        return 'qualified';
+    }
+
+    return 'competing';
+};
+
+// Update the row class function
+const getRowClass = (index: number) => {
+    const status = getTeamStatus(index);
+    const baseClasses = 'border-t hover:bg-gray-50 cursor-pointer';
+
+    switch (status) {
+        case 'eliminated':
+            return `${baseClasses} bg-red-50`;
+        case 'qualified':
+            return `${baseClasses} bg-green-50`;
+        default:
+            return baseClasses;
+    }
+};
+
+// Rest of your existing functions...
 const togglePlayerStats = (teamId: string) => {
     const index = expandedTeams.value.indexOf(teamId);
     if (index === -1) {
@@ -134,9 +211,7 @@ const togglePlayerStats = (teamId: string) => {
     }
 };
 
-// Contar MVPs de un jugador en un equipo
 const getPlayerMvpCount = (playerId: string, teamId: string): number => {
-
     if (!props.matches || props.matches.length === 0) return 0;
 
     return props.matches.reduce((count, match) => {
@@ -144,11 +219,8 @@ const getPlayerMvpCount = (playerId: string, teamId: string): number => {
         const isMvpVisitor = match.mvpEquipoVisitanteId === playerId && match.equipoVisitanteId === teamId;
         return count + (isMvpLocal || isMvpVisitor ? 1 : 0);
     }, 0);
-
 };
 
-
-// Obtener jugadores del equipo con estadísticas
 const getTeamPlayers = (teamId: string) => {
     if (!props.players) return [];
 
@@ -173,18 +245,14 @@ const getTeamPlayers = (teamId: string) => {
             }
         );
 
-        // Agregar conteo de MVP
-        const mvpCount = getPlayerMvpCount(player.id, teamId);
-
         return {
             ...player,
             stats: {
                 ...stats,
-                mvp: mvpCount,
+                mvp: getPlayerMvpCount(player.id, teamId),
             },
         };
     }).sort((a, b) => {
-        // Ordenar por goles y luego por MVPs
         if (b.stats.goles !== a.stats.goles) {
             return b.stats.goles - a.stats.goles;
         }
