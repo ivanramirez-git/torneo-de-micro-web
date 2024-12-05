@@ -1,134 +1,152 @@
 <template>
   <div class="min-h-screen bg-gray-100 py-4 px-2 sm:py-8 sm:px-4">
     <div class="max-w-7xl mx-auto">
+      <!-- Tournament Sections with Accordion -->
+      <div class="space-y-6 sm:space-y-8">
+        <Accordion :multiple="true">
+          <AccordionTab v-for="tournament in tournaments" :key="tournament.id" :style="{ backgroundColor: 'red' }">
+            <template #header>
+              <div class="flex items-center gap-2">
+                <span class="text-xl sm:text-2xl font-bold">{{ tournament.nombre }}</span>
+              </div>
+            </template>
 
-      <!-- Tournament Sections -->
-      <div class="space-y-6 sm:space-y-12">
-        <div v-for="tournament in tournaments" :key="tournament.id" class="rounded-lg p-4 sm:p-6"
-          :style="{ backgroundColor: `${tournament.color}15` }">
+            <!-- Tournament Phases and Groups -->
+            <div class="space-y-6">
+              <div v-for="phase in getTournamentPhases(tournament.id)" :key="phase.id"
+                class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+                <h3 class="text-lg font-semibold mb-4">{{ phase.nombre }}</h3>
 
-          <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" :style="{ color: tournament.color }">
-            {{ tournament.nombre }}
-          </h2>
-          <!-- Tournament Phases and Groups -->
-          <div class="space-y-6">
-            <div v-for="phase in getTournamentPhases(tournament.id)" :key="phase.id"
-              class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-              <h3 class="text-lg font-semibold mb-4">{{ phase.nombre }}</h3>
-
-              <!-- Groups in Phase -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <GroupStandingsTable v-for="group in getPhaseGroups(phase.id)" :key="group.id" :group="group"
-                  :standings="getGroupStats(group.id)" :getTeamName="getTeamName" :getTeamCrest="getTeamCrest"
-                  :players="players" :matchStats="matchStats" :matches="matches" :phase="phase" />
+                <!-- Groups in Phase -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <GroupStandingsTable v-for="group in getPhaseGroups(phase.id)" :key="group.id" :group="group"
+                    :standings="getGroupStats(group.id)" :getTeamName="getTeamName" :getTeamCrest="getTeamCrest"
+                    :players="players" :matchStats="matchStats" :matches="matches" :phase="phase" />
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Statistics Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-6">
-            <!-- Top Scorers -->
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-6">
+              <!-- Top Scorers -->
+              <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
+                <div class="space-y-3">
+                  <div v-for="player in getTopScorers(tournament.id)" :key="player.id"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
+                      <span class="font-medium mr-2">{{ player.nombre }}</span>
+                      <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
+                    </div>
+                    <span class="font-bold">{{ player.goles }} goles</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MVP Stats Card -->
+              <MvpStatsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" :players="players" />
+            </div>
+
+            <!-- Matches Section -->
+            <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+              <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
+
+              <!-- Upcoming Matches -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium mb-3">Próximos Partidos</h4>
+                <div class="space-y-4">
+                  <div v-for="match in getUpcomingMatches(tournament.id)" :key="match.id"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 sm:mb-0">
+                        <span class="text-sm text-gray-500">
+                          {{ formatDate(match.fechaProgramacion) }}
+                        </span>
+                        <span class="text-sm text-gray-500">
+                          {{ formatTime(match.horaProgramacion) }}
+                        </span>
+                      </div>
+                      <div class="flex items-center justify-between sm:justify-start space-x-2">
+                        <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
+                        <span class="text-sm">vs</span>
+                        <span class="font-medium">
+                          {{ getTeamName(match.equipoVisitanteId) }}
+                        </span>
+                      </div>
+                    </div>
+                    <span class="text-sm text-gray-500 mt-1 sm:mt-0">
+                      {{ match.lugar?.nombre }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Previous Matches -->
+              <div class="mb-6">
+                <h4 class="text-md font-medium mb-3">Partidos Anteriores</h4>
+                <div class="space-y-4">
+                  <div v-for="match in getPreviousMatches(tournament.id)" :key="match.id"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
+                      <span class="text-sm text-gray-500 mb-1 sm:mb-0">
+                        {{ formatDate(match.fechaProgramacion) }}
+                      </span>
+                      <div class="flex items-center justify-between sm:justify-start space-x-2">
+                        <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
+                        <span class="font-bold">{{ getMatchScore(match) }}</span>
+                        <span class="font-medium">
+                          {{ getTeamName(match.equipoVisitanteId) }}
+                        </span>
+                      </div>
+                    </div>
+                    <StatusBadge :match="match" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <!-- Least Scored Against -->
+              <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)"
+                :teams="getTeamsByTournament(tournament.id)" />
+
+              <!-- Team Fouls Card -->
+              <TeamFoulsCard :matches="getTournamentMatches(tournament.id)"
+                :teams="getTeamsByTournament(tournament.id)" />
+            </div>
+
+            <!-- Dirty Players -->
             <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 class="text-lg font-semibold mb-4">⚽ Goleadores</h3>
+              <h3 class="text-lg font-semibold mb-4">🚫 Jugadores más Sucios</h3>
               <div class="space-y-3">
-                <div v-for="player in getTopScorers(tournament.id)" :key="player.id"
+                <div v-for="player in getDirtyPlayers(tournament.id)" :key="player.id"
                   class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
                   <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
                     <span class="font-medium mr-2">{{ player.nombre }}</span>
-                    <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
+                    <span class="text-sm text-gray-500">
+                      ({{ getTeamName(player.equipoId) }})
+                    </span>
                   </div>
-                  <span class="font-bold">{{ player.goles }} goles</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- MVP Stats Card -->
-            <MvpStatsCard :matches="getTournamentMatches(tournament.id)" :teams="teams" :players="players" />
-
-
-          </div>
-
-          <!-- Matches Section -->
-          <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-            <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
-
-            <!-- Upcoming Matches -->
-            <div class="mb-6">
-              <h4 class="text-md font-medium mb-3">Próximos Partidos</h4>
-              <div class="space-y-4">
-                <div v-for="match in getUpcomingMatches(tournament.id)" :key="match.id"
-                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 sm:mb-0">
-                      <span class="text-sm text-gray-500">{{ formatDate(match.fechaProgramacion) }}</span>
-                      <span class="text-sm text-gray-500">{{ formatTime(match.horaProgramacion) }}</span>
-                    </div>
-                    <div class="flex items-center justify-between sm:justify-start space-x-2">
-                      <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
-                      <span class="text-sm">vs</span>
-                      <span class="font-medium">{{ getTeamName(match.equipoVisitanteId) }}</span>
-                    </div>
+                  <div class="flex items-center space-x-2 mt-1 sm:mt-0">
+                    <span v-if="player.tarjetasRojas" class="text-red-500">
+                      🟥 {{ player.tarjetasRojas }}
+                    </span>
+                    <span v-if="player.tarjetasAzules" class="text-blue-500">
+                      🟦 {{ player.tarjetasAzules }}
+                    </span>
+                    <span v-if="player.tarjetasAmarillas" class="text-yellow-500">
+                      🟨 {{ player.tarjetasAmarillas }}
+                    </span>
+                    <span v-if="player.faltas" class="text-gray-500">
+                      🛑 {{ player.faltas }}
+                    </span>
                   </div>
-                  <span class="text-sm text-gray-500 mt-1 sm:mt-0">{{ match.lugar?.nombre }}</span>
                 </div>
               </div>
             </div>
-
-            <!-- Previous Matches -->
-            <div class="mb-6">
-              <h4 class="text-md font-medium mb-3">Partidos Anteriores</h4>
-              <div class="space-y-4">
-                <div v-for="match in getPreviousMatches(tournament.id)" :key="match.id"
-                  class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
-                    <span class="text-sm text-gray-500 mb-1 sm:mb-0">{{ formatDate(match.fechaProgramacion) }}</span>
-                    <div class="flex items-center justify-between sm:justify-start space-x-2">
-                      <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
-                      <span class="font-bold">{{ getMatchScore(match) }}</span>
-                      <span class="font-medium">{{ getTeamName(match.equipoVisitanteId) }}</span>
-                    </div>
-                  </div>
-                  <StatusBadge :match="match" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Statistics Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-
-
-            <!-- Least Scored Against -->
-            <LeastScoredAgainstCard :matches="getTournamentMatches(tournament.id)"
-              :teams="getTeamsByTournament(tournament.id)" />
-
-            <!-- Team Fouls Card -->
-            <TeamFoulsCard :matches="getTournamentMatches(tournament.id)"
-              :teams="getTeamsByTournament(tournament.id)" />
-          </div>
-
-          <!-- Dirty Players -->
-          <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-            <h3 class="text-lg font-semibold mb-4">🚫 Jugadores más Sucios</h3>
-            <div class="space-y-3">
-              <div v-for="player in getDirtyPlayers(tournament.id)" :key="player.id"
-                class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2">
-                <div class="flex flex-col sm:flex-row sm:items-center mb-1 sm:mb-0">
-                  <span class="font-medium mr-2">{{ player.nombre }}</span>
-                  <span class="text-sm text-gray-500">({{ getTeamName(player.equipoId) }})</span>
-                </div>
-                <div class="flex items-center space-x-2 mt-1 sm:mt-0">
-                  <span v-if="player.tarjetasRojas" class="text-red-500">🟥 {{ player.tarjetasRojas }}</span>
-                  <span v-if="player.tarjetasAzules" class="text-blue-500">🟦 {{ player.tarjetasAzules }}</span>
-                  <span v-if="player.tarjetasAmarillas" class="text-yellow-500">🟨 {{ player.tarjetasAmarillas
-                    }}</span>
-                  <span v-if="player.faltas" class="text-gray-500">🛑 {{ player.faltas }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </AccordionTab>
+        </Accordion>
       </div>
     </div>
   </div>
@@ -141,6 +159,8 @@ import LeastScoredAgainstCard from '../components/matches/LeastScoredAgainstCard
 import GroupStandingsTable from '../components/matches/GroupStandingsTable.vue';
 import TeamFoulsCard from '../components/matches/TeamFoulsCard.vue';
 import MvpStatsCard from '../components/matches/MvpStatsCard.vue';
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
 import api from '../stores/api';
 import { Match } from '../interfaces';
 
@@ -233,8 +253,6 @@ const getMatchScore = (match: any): string => {
 
 // Tournament-specific data getters
 const getDirtyPlayers = (tournamentId: string) => {
-
-
   const tournamentMatches = matches.value.filter(m => {
     const phase = phases.value.find(p => p.torneoId === tournamentId);
     const group = groups.value.find(g => g.faseTorneoId === phase?.id);
@@ -276,18 +294,35 @@ const getDirtyPlayers = (tournamentId: string) => {
     ))
     .slice(0, 1000);
 };
-
 const getTopScorers = (tournamentId: string) => {
-  const tournamentMatches = matches.value.filter(m => {
-    const phase = phases.value.find(p => p.torneoId === tournamentId);
-    const group = groups.value.find(g => g.faseTorneoId === phase?.id);
-    return tournamentId === phase?.torneoId;
-  });
+  // Fases del torneo
+  const tournamentPhases = phases.value.filter(phase => phase.torneoId === tournamentId);
+
+  // Grupos dentro de las fases del torneo
+  const tournamentGroups = groups.value.filter(group =>
+    tournamentPhases.some(phase => group.faseTorneoId === phase.id)
+  );
+
+  // Equipos que participan en los grupos del torneo
+  const tournamentTeamIds = teamGroups.value
+    .filter(tg => tournamentGroups.some(group => group.id === tg.grupoId))
+    .map(tg => tg.equipoId);
+
+  // Partidos del torneo
+  const tournamentMatches = matches.value.filter(match =>
+    tournamentGroups.some(group => group.id === match.grupoId)
+  );
 
   const matchIds = tournamentMatches.map(m => m.id);
-  const relevantStats = matchStats.value.filter(s => matchIds.includes(s.partidoId));
 
-  const playerStats = {};
+  // Filtrar estadísticas solo de jugadores de equipos del torneo
+  const relevantStats = matchStats.value.filter(stat =>
+    matchIds.includes(stat.partidoId) && tournamentTeamIds.includes(stat.equipoId)
+  );
+
+  const playerStats: { [key: string]: { id: string; equipoId: string; goles: number } } = {};
+
+  // Acumular estadísticas por jugador
   relevantStats.forEach(stat => {
     if (!playerStats[stat.jugadorId]) {
       playerStats[stat.jugadorId] = {
@@ -299,6 +334,7 @@ const getTopScorers = (tournamentId: string) => {
     playerStats[stat.jugadorId].goles += stat.goles || 0;
   });
 
+  // Combinar información del jugador y ordenar por goles
   return Object.values(playerStats)
     .map(stats => ({
       ...stats,
@@ -308,6 +344,7 @@ const getTopScorers = (tournamentId: string) => {
     .sort((a, b) => b.goles - a.goles)
     .slice(0, 15);
 };
+
 
 const getTournamentMatches = (tournamentId: string) => {
   return matches.value.filter(m => {
@@ -320,8 +357,6 @@ const getTournamentMatches = (tournamentId: string) => {
 const getTeamsByTournament = (tournamentId: string) => {
   return teams.value.filter(t => t.torneoId === tournamentId);
 };
-
-
 
 const getMatchStatus = (match: Match): string => {
   const now = new Date();
@@ -340,7 +375,6 @@ const getMatchStatus = (match: Match): string => {
 };
 
 const getPreviousMatches = (tournamentId: string) => {
-
   return matches.value
     .filter(m => {
       const phase = phases.value.find(p => p.torneoId === tournamentId);
@@ -352,7 +386,6 @@ const getPreviousMatches = (tournamentId: string) => {
 };
 
 const getUpcomingMatches = (tournamentId: string) => {
-
   return matches.value
     .filter(m => {
       const phase = phases.value.find(p => p.torneoId === tournamentId);
@@ -362,7 +395,6 @@ const getUpcomingMatches = (tournamentId: string) => {
     .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime())
     .slice(0, 15);
 };
-
 
 const getTournamentPhases = (tournamentId: string) => {
   return phases.value.filter(p => p.torneoId === tournamentId);
@@ -428,7 +460,7 @@ const getGroupStats = (groupId: string) => {
         goalsFor: 0,
         goalsAgainst: 0,
         fouls: 0,
-        puntosDisciplinarios: disciplinaryPointsMap[teamId] || 0, // Asignar puntos disciplinarios totales
+        puntosDisciplinarios: disciplinaryPointsMap[teamId] || 0,
         points: 0
       };
 
@@ -474,15 +506,31 @@ const getGroupStats = (groupId: string) => {
       return stats;
     })
     .sort((a, b) => {
-      // Criterios de clasificación
       if (b.points !== a.points) return b.points - a.points;
       if (a.puntosDisciplinarios !== b.puntosDisciplinarios) return a.puntosDisciplinarios - b.puntosDisciplinarios;
-      return b.goalsFor - a.goalsFor; // Más goles es mejor
+      return b.goalsFor - a.goalsFor;
     });
 
   return groupTeamStats;
 };
 
-
 onMounted(loadData);
 </script>
+
+<style scoped>
+:deep(.p-accordion-header-link) {
+  background-color: white !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+:deep(.p-accordion-content) {
+  border: none !important;
+  padding: 1rem !important;
+}
+
+:deep(.p-accordion-tab) {
+  margin-bottom: 1rem !important;
+}
+</style>
