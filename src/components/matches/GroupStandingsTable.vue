@@ -5,9 +5,12 @@
             <table class="w-full">
                 <thead>
                     <tr class="text-left text-sm">
-                        <th class="sticky left-0 bg-white pb-2 pl-4 sm:pl-0 w-12">Pos</th>
-                        <th class="sticky left-12 bg-white pb-2 w-12 sm:w-auto">Equipo</th>
-                        <th class="pb-2 text-center">Pts</th>
+                        <th class="sticky pb-2">#</th>
+                        <th class="sticky pb-2 sm:w-auto">
+                            <span class="hidden sm:inline">Equipo</span>
+                            <span class="sm:hidden">Equi</span>
+                        </th>
+                        <th class="pb-2 text-center">P</th>
                         <th class="pb-2 text-center">PJ</th>
                         <th class="pb-2 text-center">PG</th>
                         <th class="pb-2 text-center">PE</th>
@@ -15,17 +18,17 @@
                         <th class="pb-2 text-center">GF</th>
                         <th class="pb-2 text-center">GC</th>
                         <th class="pb-2 text-center">DG</th>
-                        <th class="pb-2 text-center">Faltas</th>
+                        <th class="pb-2 text-center">F</th>
                     </tr>
                 </thead>
                 <tbody>
                     <template v-for="(stats, index) in standings" :key="stats.teamId">
                         <!-- Team Row -->
                         <tr @click="togglePlayerStats(stats.teamId)" :class="getRowClass(index)" class="group">
-                            <td class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold w-12 text-center">
+                            <td class="sticky py-2 font-bold  text-center">
                                 {{ index + 1 }}
                             </td>
-                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
+                            <td class="sticky py-2 sm:w-auto">
                                 <div class="flex items-center">
                                     <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
                                         :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
