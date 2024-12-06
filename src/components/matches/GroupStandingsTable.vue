@@ -22,11 +22,10 @@
                     <template v-for="(stats, index) in standings" :key="stats.teamId">
                         <!-- Team Row -->
                         <tr @click="togglePlayerStats(stats.teamId)" :class="getRowClass(index)" class="group">
-                            <td
-                                class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold text-gray-500 w-12 text-center group-hover:bg-gray-50">
+                            <td class="sticky left-0 bg-white py-2 pl-4 sm:pl-0 font-bold w-12 text-center">
                                 {{ index + 1 }}
                             </td>
-                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto group-hover:bg-gray-50">
+                            <td class="sticky left-12 bg-white py-2 w-12 sm:w-auto">
                                 <div class="flex items-center">
                                     <img v-if="getTeamCrest(stats.teamId)" :src="getTeamCrest(stats.teamId)"
                                         :alt="getTeamName(stats.teamId)" class="w-8 h-8 object-contain" />
@@ -45,6 +44,8 @@
                             <td class="py-2 text-center">{{ stats.goalsFor - stats.goalsAgainst }}</td>
                             <td class="py-2 text-center">{{ stats.puntosDisciplinarios }}</td>
                         </tr>
+
+
                         <!-- Player Stats Row -->
                         <transition name="fade" mode="out-in">
                             <tr v-if="expandedTeams.includes(stats.teamId)" :class="getRowClass(index)">
@@ -134,57 +135,36 @@ const getTeamStatus = (currentTeamIndex: number) => {
     const currentTeam = props.standings[currentTeamIndex];
     const totalTeamMatches = totalMatchesPerTeam.value;
 
-    if (currentTeam.played === totalTeamMatches) {
-        // Team has played all matches, determine final position
-        // Sort teams by points
-        const sortedTeams = [...props.standings].sort((a, b) => b.points - a.points);
-        const teamPosition = sortedTeams.findIndex(team => team.teamId === currentTeam.teamId) + 1;
-
-        if (teamPosition <= numberOfQualifiedTeams) {
-            return 'qualified';
-        } else {
-            return 'eliminated';
-        }
-    }
-
+    // Calcular puntos máximos posibles para el equipo actual
     const remainingMatches = totalTeamMatches - currentTeam.played;
     const maxPossiblePoints = currentTeam.points + (remainingMatches * 3);
 
-    // Sort teams by points to find qualification threshold
+    // Ordenar equipos por puntos para identificar el umbral de clasificación
     const sortedTeams = [...props.standings].sort((a, b) => b.points - a.points);
     const qualificationThreshold = sortedTeams[numberOfQualifiedTeams - 1]?.points || 0;
 
-    // Check if mathematically eliminated
-    let teamsAbove = 0;
-    let guaranteedBetter = 0;
+    // Clasificado matemáticamente
+    const teamsBelowThatCanCatchUp = props.standings.slice(currentTeamIndex + 1).filter(team => {
+        const teamRemainingMatches = totalTeamMatches - team.played;
+        const teamMaxPoints = team.points + (teamRemainingMatches * 3);
+        return teamMaxPoints >= currentTeam.points;
+    }).length;
 
-    props.standings.forEach((team, index) => {
-        if (index !== currentTeamIndex) {
-            const teamRemainingMatches = totalTeamMatches - team.played;
-            const teamMaxPoints = team.points + (teamRemainingMatches * 3);
-
-            if (team.points > maxPossiblePoints) {
-                guaranteedBetter++;
-            }
-            if (team.points > currentTeam.points) {
-                teamsAbove++;
-            }
-        }
-    });
-
-    // Eliminated if too many teams are guaranteed to finish with more points
-    if (guaranteedBetter >= numberOfQualifiedTeams) {
-        return 'eliminated';
+    if (teamsBelowThatCanCatchUp < numberOfQualifiedTeams - currentTeamIndex) {
+        return 'qualified'; // Clasificado matemáticamente
     }
 
-    // Calculate minimum guaranteed position
-    const guaranteedPosition = teamsAbove + 1;
-    if (guaranteedPosition <= numberOfQualifiedTeams && currentTeam.points > qualificationThreshold) {
-        return 'qualified';
+    // Eliminado matemáticamente
+    const teamsBetterThanMaxPoints = props.standings.filter(team => team.points > maxPossiblePoints).length;
+    if (teamsBetterThanMaxPoints >= numberOfQualifiedTeams) {
+        return 'eliminated'; // Eliminado matemáticamente
     }
 
+    // Si no está clasificado ni eliminado
     return 'competing';
 };
+
+
 
 // Update the row class function
 const getRowClass = (index: number) => {
@@ -193,13 +173,15 @@ const getRowClass = (index: number) => {
 
     switch (status) {
         case 'eliminated':
-            return `${baseClasses} bg-red-50`;
+            return `${baseClasses} bg-red-50`; // Fila roja
         case 'qualified':
-            return `${baseClasses} bg-green-50`;
+            return `${baseClasses} bg-green-50`; // Fila verde
+        case 'competing':
         default:
-            return baseClasses;
+            return baseClasses; // Sin color adicional
     }
 };
+
 
 // Rest of your existing functions...
 const togglePlayerStats = (teamId: string) => {
