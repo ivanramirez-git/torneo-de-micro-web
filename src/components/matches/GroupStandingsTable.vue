@@ -1,5 +1,5 @@
 <template>
-    <div class="border rounded-lg p-4 overflow-x-auto">
+    <div class=" bg-white border rounded-lg p-4 overflow-x-auto">
         <h4 class="font-medium mb-3">{{ groupName }}</h4>
         <div class="overflow-x-auto">
             <table class="w-full">
