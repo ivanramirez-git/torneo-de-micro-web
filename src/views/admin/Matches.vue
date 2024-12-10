@@ -202,7 +202,15 @@ const matchForm = ref<Partial<Match>>({
 const loadMatches = async () => {
   try {
     loading.value = true;
-    const response = await api.get('/partidos');
+    const response = await api.get('/partidos', {
+      params: {
+        filter: {
+          order: [
+            'createdAt DESC'
+          ]
+        }
+      }
+    });
     matches.value = response.data;
   } catch (error) {
     console.error('Error loading matches:', error);
