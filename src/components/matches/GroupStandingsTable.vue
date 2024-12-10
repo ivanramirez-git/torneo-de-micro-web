@@ -124,6 +124,10 @@ const props = defineProps<{
     matches?: Match[];
 }>();
 
+console.log('Fase', props.phase.nombre);
+props.phase.permiteEmpates ? console.log('Fase de grupos') : console.log('Playoffs');
+
+
 const groupName = props.group.nombre;
 const numberOfQualifiedTeams = props.phase.equiposClasificadosPorGrupo;
 const expandedTeams = ref<string[]>([]);

@@ -20,9 +20,14 @@
 
                   <!-- Groups in Phase -->
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <GroupStandingsTable v-for="group in getPhaseGroups(phase.id)" :key="group.id" :group="group"
-                      :standings="getGroupStats(group.id)" :getTeamName="getTeamName" :getTeamCrest="getTeamCrest"
-                      :players="players" :matchStats="matchStats" :matches="matches" :phase="phase" />
+                    <template v-for="group in getPhaseGroups(phase.id)" :key="group.id">
+                      <GroupStandingsTable v-if="phase.permiteEmpates" :group="group"
+                        :standings="getGroupStats(group.id)" :getTeamName="getTeamName" :getTeamCrest="getTeamCrest"
+                        :players="players" :matchStats="matchStats" :matches="matches" :phase="phase" />
+                      <PlayoffMatchSummary v-else :match="getGroupMatch(group.id)" :group="group" :phase="phase"
+                        :getTeamName="getTeamName" :getTeamCrest="getTeamCrest" :players="players"
+                        :matchStats="matchStats" />
+                    </template>
                   </div>
                 </div>
               </div>
@@ -160,6 +165,7 @@ import { ref, onMounted } from 'vue';
 import StatusBadge from '../components/matches/StatusBadge.vue';
 import LeastScoredAgainstCard from '../components/matches/LeastScoredAgainstCard.vue';
 import GroupStandingsTable from '../components/matches/GroupStandingsTable.vue';
+import PlayoffMatchSummary from '../components/matches/PlayoffMatchSummary.vue';
 import TeamFoulsCard from '../components/matches/TeamFoulsCard.vue';
 import MvpStatsCard from '../components/matches/MvpStatsCard.vue';
 import Accordion from 'primevue/accordion';
@@ -564,6 +570,10 @@ const getGroupStats = (groupId: string) => {
     });
 
   return groupTeamStats;
+};
+
+const getGroupMatch = (groupId: string) => {
+  return matches.value.find(m => m.grupoId === groupId);
 };
 
 onMounted(loadData);
