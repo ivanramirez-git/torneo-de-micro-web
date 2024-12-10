@@ -449,7 +449,7 @@ const getUpcomingMatches = (tournamentId: string) => {
 
 
 const getTournamentPhases = (tournamentId: string) => {
-  return phases.value.filter(phase => phase.torneoId === tournamentId);
+  return phases.value.filter(phase => phase.torneoId === tournamentId).reverse();
 };
 
 const getPhaseGroups = (phaseId: string) => {
