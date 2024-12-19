@@ -21,7 +21,7 @@
                     <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinSegundoTiempo"
                         label="Finalizar Segundo Tiempo" severity="warning" @click="endSecondHalf" />
                     <Button
-                        v-if="match?.horaFinSegundoTiempo && !match?.horaInicioTiempoExtra1 && match?.grupo?.faseTorneo?.permiteEmpates"
+                        v-if="match?.horaFinSegundoTiempo && !match?.horaInicioTiempoExtra1 && !match?.grupo?.faseTorneo?.permiteEmpates"
                         label="Iniciar Tiempo Extra 1" severity="success" @click="startExtraTime1" />
                     <Button v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1"
                         label="Finalizar Tiempo Extra 1" severity="warning" @click="endExtraTime1" />
@@ -77,8 +77,12 @@
                     :isActive="isMatchActive" @goal="addGoal" @foul="addFoul" @card="saveCard"
                     @requestTime="requestTime" />
             </div>
-
         </div>
+
+        <!-- Penalty Sheet -->
+        <PenaltySheet v-if="match?.horaFinTiempoExtra2 && !match?.grupo?.faseTorneo?.permiteEmpates" :match="match"
+            :teams="teams" @savePenalty="savePenalty" :players="players" />
+
 
         <!-- Dialogs -->
         <EventDialogs v-model:goalDialog="goalDialog" v-model:foulDialog="foulDialog" v-model:cardDialog="cardDialog"
@@ -107,6 +111,7 @@ import QuickActions from '../../components/matches/QuickActions.vue';
 import TeamStats from '../../components/matches/TeamStats.vue';
 import MatchSummary from '../../components/matches/MatchSummary.vue';
 import EventDialogs from '../../components/matches/EventDialogs.vue';
+import PenaltySheet from '../../components/matches/PenaltySheet.vue'; // Importar el nuevo componente
 
 
 const route = useRoute();
@@ -665,6 +670,29 @@ const endMatch = async () => {
             severity: 'error',
             summary: 'Error',
             detail: 'No se pudo finalizar el partido'
+        });
+    }
+};
+
+const savePenalty = async ({ player, team, goal }) => {
+    try {
+        await api.post('/penales', {
+            gol: goal,
+            partidoId: match.value?.id,
+            equipoId: team.id
+        });
+        await loadMatch();
+        toast.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Penal registrado'
+        });
+    } catch (error) {
+        console.error('Error saving penalty:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo registrar el penal'
         });
     }
 };

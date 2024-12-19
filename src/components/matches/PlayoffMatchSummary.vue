@@ -15,7 +15,11 @@
                 </div>
                 <div v-if="match?.horaFinPartido" class="text-sm text-gray-500">
                     <span v-if="match?.horaFinTiempoExtra2">Tiempo Extra</span>
+                    <br>
                     <span v-if="match?.horaFinPenales">Penales</span>
+                    <div v-if="penaltySummary" class="text-sm text-gray-500">
+                        {{ penaltySummary.local }} - {{ penaltySummary.visitante }}
+                    </div>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -79,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import type { Match, Team, Player, Group, TournamentPhase, MatchStatistics } from '../../interfaces';
 
 const props = defineProps<{
@@ -145,4 +149,26 @@ const getEventDescription = (event: MatchStatistics): string => {
     if (event.faltas) return 'cometió una falta';
     return '';
 };
+
+const penaltySummary = ref<{ local: number, visitante: number } | null>(null);
+
+const fetchPenaltySummary = async () => {
+    if (!props.match?.id) return;
+    try {
+        const response = await fetch('https://api-micro.freeloz.com/penales');
+        const penalties = await response.json();
+        const matchPenalties = penalties.filter((penalty: any) => penalty.partidoId === props.match.id);
+        const localPenalties = matchPenalties.filter((penalty: any) => penalty.equipoId === props.match?.equipoLocalId && penalty.gol).length;
+        const visitantePenalties = matchPenalties.filter((penalty: any) => penalty.equipoId === props.match?.equipoVisitanteId && penalty.gol).length;
+        penaltySummary.value = { local: localPenalties, visitante: visitantePenalties };
+    } catch (error) {
+        console.error('Error fetching penalty summary:', error);
+    }
+};
+
+onMounted(() => {
+    if (props.match?.horaFinPenales) {
+        fetchPenaltySummary();
+    }
+});
 </script>
