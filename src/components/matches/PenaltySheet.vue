@@ -2,12 +2,15 @@
     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
         <h3 class="text-lg font-medium mb-4">Planilla de Penaltis</h3>
         <div class="grid grid-cols-2 gap-4">
-            <div v-for="team in getCurrentTeams()" :key="team.id" class="flex flex-row">
+            <div v-for="team in getCurrentTeams()" :key="team.id" class="flex flex-col">
                 <h4 class="text-md font-medium mb-2">{{ team.nombre }}</h4>
-                <Button label="Gol" icon="pi pi-fw pi-check" class="p-button-success p-button-sm"
-                    @click="$emit('savePenalty', { team, goal: true })">⚽️</Button>
-                <Button label="Fallo" icon="pi pi-fw pi-times" class="p-button-danger p-button-sm ml-2"
-                    @click="$emit('savePenalty', { team, goal: false })">❌</Button>
+                <div  class="flex flex-row">
+
+                    <Button label="Gol" icon="pi pi-fw pi-check" class="p-button-success p-button-sm"
+                    @click="handlePenalty(team, true)">⚽️</Button>
+                    <Button label="Fallo" icon="pi pi-fw pi-times" class="p-button-danger p-button-sm ml-2"
+                    @click="handlePenalty(team, false)">❌</Button>
+                </div>
             </div>
         </div>
         <div class="mt-6">
@@ -72,6 +75,16 @@ const loadPenalties = async () => {
     }
 };
 
+const handlePenalty = (team: Team, goal: boolean) => {
+    const penalty = {
+        id: Date.now().toString(),
+        equipoId: team.id,
+        jugadorNombre: 'Jugador', // Aquí puedes agregar lógica para seleccionar el nombre del jugador
+        gol: goal
+    };
+    penalties.value.push(penalty);
+    emit('savePenalty', { team, goal });
+};
 
 onMounted(() => {
     loadPenalties();

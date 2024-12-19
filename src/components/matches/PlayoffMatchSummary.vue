@@ -107,7 +107,13 @@ const getTeamGoals = (teamId?: string): number => {
 
 const getTeamStats = (teamId?: string) => {
     if (!teamId || !props.match?.estadisticasPartido) return null;
-    return props.match.estadisticasPartido.find(stat => stat.equipoId === teamId);
+    const stats = props.match.estadisticasPartido;
+    return {
+        faltas: stats.reduce((sum, stat) => sum + (stat.faltas || 0), 0),
+        tarjetasAmarillas: stats.reduce((sum, stat) => sum + (stat.tarjetasAmarillas || 0), 0),
+        tarjetasAzules: stats.reduce((sum, stat) => sum + (stat.tarjetasAzules || 0), 0),
+        tarjetasRojas: stats.reduce((sum, stat) => sum + (stat.tarjetasRojas || 0), 0),
+    };
 };
 
 const getPlayerName = (playerId: string): string => {
@@ -142,11 +148,12 @@ const getEventIcon = (event: MatchStatistics): string => {
 };
 
 const getEventDescription = (event: MatchStatistics): string => {
-    if (event.goles) return 'marcó un gol';
-    if (event.tarjetasRojas) return 'recibió tarjeta roja';
-    if (event.tarjetasAzules) return 'recibió tarjeta azul';
-    if (event.tarjetasAmarillas) return 'recibió tarjeta amarilla';
-    if (event.faltas) return 'cometió una falta';
+    const teamName = props.getTeamName(event.equipoId);
+    if (event.goles) return ` (${teamName}) marcó un gol`;
+    if (event.tarjetasRojas) return ` (${teamName}) recibió tarjeta roja`;
+    if (event.tarjetasAzules) return ` (${teamName}) recibió tarjeta azul`;
+    if (event.tarjetasAmarillas) return ` (${teamName}) recibió tarjeta amarilla`;
+    if (event.faltas) return ` (${teamName}) cometió una falta`;
     return '';
 };
 
