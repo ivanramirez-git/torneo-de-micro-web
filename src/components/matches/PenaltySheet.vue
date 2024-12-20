@@ -39,7 +39,7 @@ const props = defineProps<{
     players: Player[];
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
     (e: 'savePenalty', data: { team: Team; goal: boolean }): void;
 }>();
 
@@ -76,6 +76,7 @@ const loadPenalties = async () => {
 };
 
 const handlePenalty = (team: Team, goal: boolean) => {
+    console.log('Penalty:', team, goal);
     const penalty = {
         id: Date.now().toString(),
         equipoId: team.id,
