@@ -6,12 +6,12 @@
         <Accordion :multiple="true">
           <AccordionTab v-for="tournament in tournaments" :key="tournament.id" @click="handleTournamentExpand(tournament.nombre)">
             <template #header>
-              <div class="flex items-center gap-2" :style="{ color: `${tournament.color}` }">
+              <div class="flex items-center gap-2" :style="{ color: formatColor(tournament.color) }">
                 <span class="text-xl sm:text-2xl font-bold">{{ tournament.nombre }}</span>
               </div>
             </template>
 
-            <div :style="{ backgroundColor: `${tournament.color}15` }">
+            <div :style="{ backgroundColor: `${formatColor(tournament.color)}15` }">
 
               <!-- Tournament Phases and Groups -->
               <div class="space-y-6">
@@ -247,6 +247,12 @@ const getTeamName = (teamId: string): string => {
 const getTeamCrest = (teamId: string): string => {
   const team = teams.value.find(t => t.id === teamId);
   return team?.escudoUrl || '';
+};
+
+const formatColor = (color: string): string => {
+  if (!color) return '#000000';
+  // Si el color no empieza con #, agregarlo
+  return color.startsWith('#') ? color : `#${color}`;
 };
 
 const formatDate = (date: string): string => {
