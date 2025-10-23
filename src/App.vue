@@ -5,7 +5,7 @@
         <div class="flex justify-between h-16">
           <div class="flex">
             <router-link to="/" class="flex items-center">
-              <span class="text-xl font-bold">Copa navideña 🎄 2024</span>
+              <span class="text-xl font-bold">Copa navideña 🎄</span>
             </router-link>
           </div>
           <div class="flex items-center space-x-4">
