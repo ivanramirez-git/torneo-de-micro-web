@@ -4,7 +4,7 @@
       <!-- Tournament Sections with Accordion -->
       <div class="space-y-6 sm:space-y-8">
         <Accordion :multiple="true">
-          <AccordionTab v-for="tournament in tournaments" :key="tournament.id">
+          <AccordionTab v-for="tournament in tournaments" :key="tournament.id" @click="handleTournamentExpand(tournament.nombre)">
             <template #header>
               <div class="flex items-center gap-2" :style="{ color: `${tournament.color}` }">
                 <span class="text-xl sm:text-2xl font-bold">{{ tournament.nombre }}</span>
@@ -172,6 +172,7 @@ import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import api from '../stores/api';
 import { Match } from '../interfaces';
+import { trackEvent, trackTournamentEvent } from '../utils/analytics';
 
 // State
 const tournaments = ref([]);
@@ -196,7 +197,13 @@ const loadData = async () => {
       teamGroupsRes,
       statsRes
     ] = await Promise.all([
-      api.get('/torneos'),
+      api.get('/torneos', {
+        params: {
+          filter: {
+            order: 'createdAt DESC'
+          }
+        }
+      }),
       api.get('/equipos'),
       api.get('/jugadores'),
       api.get('/partidos', {
@@ -576,7 +583,18 @@ const getGroupMatch = (groupId: string) => {
   return matches.value.find(m => m.grupoId === groupId);
 };
 
-onMounted(loadData);
+// Tracking de expansión de acordeón de torneo
+const handleTournamentExpand = (tournamentName: string) => {
+  trackTournamentEvent('expand_tournament_accordion', tournamentName);
+};
+
+onMounted(() => {
+  loadData();
+  // Track home page view
+  trackEvent('home_page_loaded', {
+    tournaments_count: tournaments.value.length
+  });
+});
 </script>
 
 <style scoped>

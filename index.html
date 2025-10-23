@@ -95,13 +95,15 @@
       }
     </script>
 
-    <!-- Analytics -->
-    <script
-      async
-      src="https://analiticas.freeloz.com/tracker.js"
-      data-ackee-server="https://analiticas.freeloz.com"
-      data-ackee-domain-id="19c7e29b-c72d-44ed-bec5-f72412122429"
-    ></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M6RFKSHD42"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-M6RFKSHD42');
+    </script>
   </head>
   <body>
     <div id="app"></div>

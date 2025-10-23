@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
-import { trackVisit } from '../middleware/visitTracker';
+import { trackPageView } from '../utils/analytics';
 
 const routes = [
   {
@@ -91,10 +91,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Validate that the routes are public
-  if (to.meta.public) {
-    await trackVisit();
-  }
+  // Track page view for all routes
+  trackPageView(to.path, to.meta.title as string);
 
   // Handle authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

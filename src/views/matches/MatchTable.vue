@@ -121,6 +121,7 @@ import { ref, onMounted } from 'vue';
 import api from '../../stores/api';
 import StatusBadge from '../../components/matches/StatusBadge.vue';
 import Dropdown from 'primevue/dropdown';
+import { trackEvent, trackSearch } from '../../utils/analytics';
 
 // State
 const tournaments = ref([]);
@@ -153,6 +154,12 @@ const loadPhases = async () => {
     selectedGroup.value = null;
     groups.value = [];
     matches.value = [];
+    
+    // Track filter change
+    trackEvent('filter_tournament', {
+      tournament_name: selectedTournament.value.nombre,
+      tournament_id: selectedTournament.value.id
+    });
   } catch (error) {
     console.error('Error loading phases:', error);
   }
@@ -166,6 +173,12 @@ const loadGroups = async () => {
     groups.value = response.data;
     selectedGroup.value = null;
     matches.value = [];
+    
+    // Track filter change
+    trackEvent('filter_phase', {
+      phase_name: selectedPhase.value.nombre,
+      phase_id: selectedPhase.value.id
+    });
   } catch (error) {
     console.error('Error loading groups:', error);
   }
@@ -186,6 +199,14 @@ const loadMatches = async () => {
       }
     });
     matches.value = response.data;
+    
+    // Track filter change and search
+    trackSearch(`${selectedTournament.value?.nombre || ''} - ${selectedPhase.value?.nombre || ''} - ${selectedGroup.value?.nombre || ''}`, matches.value.length);
+    trackEvent('filter_group', {
+      group_name: selectedGroup.value.nombre,
+      group_id: selectedGroup.value.id,
+      matches_count: matches.value.length
+    });
   } catch (error) {
     console.error('Error loading matches:', error);
   }
