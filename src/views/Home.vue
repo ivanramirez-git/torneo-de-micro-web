@@ -680,7 +680,7 @@ const getAllTournamentMatches = (tournamentId: string) => {
 
   return matches.value
     .filter(match => tournamentGroups.some(group => group.id === match.grupoId))
-    .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime());
+    .sort((a, b) => new Date(b.fechaProgramacion).getTime() - new Date(a.fechaProgramacion).getTime());
 };
 
 const getPaginatedMatches = (tournamentId: string) => {
