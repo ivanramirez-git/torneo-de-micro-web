@@ -55,59 +55,58 @@
 
               <!-- Matches Section -->
               <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
-                <h3 class="text-lg font-semibold mb-4">📅 Partidos</h3>
+                <h3 class="text-lg font-semibold mb-4">📅 Todos los Partidos</h3>
 
-                <!-- Upcoming Matches -->
-                <div class="mb-6">
-                  <h4 class="text-md font-medium mb-3">Próximos Partidos</h4>
-                  <div class="space-y-4">
-                    <div v-for="match in getUpcomingMatches(tournament.id)" :key="match.id"
-                      class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
-                      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 sm:mb-0">
-                          <span class="text-sm text-gray-500">
-                            {{ formatDate(match.fechaProgramacion) }}
-                          </span>
-                          <span class="text-sm text-gray-500">
-                            {{ formatTime(match.horaProgramacion) }}
-                          </span>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-start space-x-2">
-                          <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
-                          <span class="text-sm">vs</span>
-                          <span class="font-medium">
-                            {{ getTeamName(match.equipoVisitanteId) }}
-                          </span>
-                        </div>
+                <!-- All Matches Paginated -->
+                <div class="space-y-4">
+                  <div v-for="match in getPaginatedMatches(tournament.id)" :key="match.id"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
+                      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 sm:mb-0">
+                        <span class="text-sm text-gray-500">
+                          {{ formatDate(match.fechaProgramacion) }}
+                        </span>
+                        <span class="text-sm text-gray-500">
+                          {{ formatTime(match.horaProgramacion) }}
+                        </span>
                       </div>
-                      <span class="text-sm text-gray-500 mt-1 sm:mt-0">
+                      <div class="flex items-center justify-between sm:justify-start space-x-2">
+                        <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
+                        <span v-if="match.horaFinPartido" class="font-bold">{{ getMatchScore(match) }}</span>
+                        <span v-else class="text-sm">vs</span>
+                        <span class="font-medium">
+                          {{ getTeamName(match.equipoVisitanteId) }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm text-gray-500">
                         {{ match.lugar?.nombre }}
                       </span>
+                      <StatusBadge :match="match" />
                     </div>
                   </div>
                 </div>
 
-                <!-- Previous Matches -->
-                <div class="mb-6">
-                  <h4 class="text-md font-medium mb-3">Partidos Anteriores</h4>
-                  <div class="space-y-4">
-                    <div v-for="match in getPreviousMatches(tournament.id)" :key="match.id"
-                      class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3">
-                      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-2 sm:mb-0">
-                        <span class="text-sm text-gray-500 mb-1 sm:mb-0">
-                          {{ formatDate(match.fechaProgramacion) }}
-                        </span>
-                        <div class="flex items-center justify-between sm:justify-start space-x-2">
-                          <span class="font-medium">{{ getTeamName(match.equipoLocalId) }}</span>
-                          <span class="font-bold">{{ getMatchScore(match) }}</span>
-                          <span class="font-medium">
-                            {{ getTeamName(match.equipoVisitanteId) }}
-                          </span>
-                        </div>
-                      </div>
-                      <StatusBadge :match="match" />
-                    </div>
-                  </div>
+                <!-- Pagination Controls -->
+                <div v-if="getTotalPages(tournament.id) > 1" class="flex items-center justify-center gap-2 mt-6">
+                  <button 
+                    @click="previousPage(tournament.id)"
+                    :disabled="getCurrentPage(tournament.id) === 1"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ← Anterior
+                  </button>
+                  <span class="text-sm text-gray-600">
+                    Página {{ getCurrentPage(tournament.id) }} de {{ getTotalPages(tournament.id) }}
+                  </span>
+                  <button 
+                    @click="nextPage(tournament.id)"
+                    :disabled="getCurrentPage(tournament.id) === getTotalPages(tournament.id)"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Siguiente →
+                  </button>
                 </div>
               </div>
 
@@ -183,6 +182,10 @@ const phases = ref([]);
 const groups = ref([]);
 const teamGroups = ref([]);
 const matchStats = ref([]);
+
+// Pagination state - Map to store current page for each tournament
+const currentPages = ref<Record<string, number>>({});
+const MATCHES_PER_PAGE = 20;
 
 // Data loading
 const loadData = async () => {
@@ -466,6 +469,60 @@ const getUpcomingMatches = (tournamentId: string) => {
     .slice(0, 15);
 };
 
+// Pagination functions
+const getAllTournamentMatches = (tournamentId: string) => {
+  const tournamentPhases = phases.value.filter(phase => phase.torneoId === tournamentId);
+  const tournamentGroups = groups.value.filter(group =>
+    tournamentPhases.some(phase => group.faseTorneoId === phase.id)
+  );
+
+  return matches.value
+    .filter(match => tournamentGroups.some(group => group.id === match.grupoId))
+    .sort((a, b) => new Date(a.fechaProgramacion).getTime() - new Date(b.fechaProgramacion).getTime());
+};
+
+const getPaginatedMatches = (tournamentId: string) => {
+  const allMatches = getAllTournamentMatches(tournamentId);
+  const currentPage = currentPages.value[tournamentId] || 1;
+  const startIndex = (currentPage - 1) * MATCHES_PER_PAGE;
+  const endIndex = startIndex + MATCHES_PER_PAGE;
+  
+  return allMatches.slice(startIndex, endIndex);
+};
+
+const getTotalPages = (tournamentId: string) => {
+  const allMatches = getAllTournamentMatches(tournamentId);
+  return Math.ceil(allMatches.length / MATCHES_PER_PAGE);
+};
+
+const getCurrentPage = (tournamentId: string) => {
+  return currentPages.value[tournamentId] || 1;
+};
+
+const nextPage = (tournamentId: string) => {
+  const totalPages = getTotalPages(tournamentId);
+  const currentPage = getCurrentPage(tournamentId);
+  if (currentPage < totalPages) {
+    currentPages.value[tournamentId] = currentPage + 1;
+    trackEvent('matches_pagination', {
+      tournament_id: tournamentId,
+      page: currentPages.value[tournamentId],
+      action: 'next'
+    });
+  }
+};
+
+const previousPage = (tournamentId: string) => {
+  const currentPage = getCurrentPage(tournamentId);
+  if (currentPage > 1) {
+    currentPages.value[tournamentId] = currentPage - 1;
+    trackEvent('matches_pagination', {
+      tournament_id: tournamentId,
+      page: currentPages.value[tournamentId],
+      action: 'previous'
+    });
+  }
+};
 
 const getTournamentPhases = (tournamentId: string) => {
   return phases.value.filter(phase => phase.torneoId === tournamentId).reverse();
