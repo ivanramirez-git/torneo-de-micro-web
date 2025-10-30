@@ -794,7 +794,12 @@ const getGroupStats = (groupId: string) => {
         points: 0
       };
 
-      teamMatches.forEach((match: Match) => {
+      // DEBUG: Log para cada equipo
+      const teamName = getTeamName(teamId);
+      console.log(`\n📊 === Calculando puntos para ${teamName} (${teamId}) ===`);
+      console.log(`Partidos del grupo para este equipo: ${teamMatches.length}`);
+
+      teamMatches.forEach((match: Match, index: number) => {
         const isLocal = match.equipoLocalId === teamId;
         const localGoals =
           match.estadisticasPartido
@@ -805,6 +810,9 @@ const getGroupStats = (groupId: string) => {
             ?.filter(s => s.equipoId === match.equipoVisitanteId)
             .reduce((sum, s) => sum + (s.goles || 0), 0) || 0;
 
+        const oppositeTeamId = isLocal ? match.equipoVisitanteId : match.equipoLocalId;
+        const oppositeTeamName = getTeamName(oppositeTeamId);
+
         if (isLocal) {
           stats.goalsFor += localGoals;
           stats.goalsAgainst += visitorGoals;
@@ -813,25 +821,36 @@ const getGroupStats = (groupId: string) => {
           stats.goalsAgainst += localGoals;
         }
 
+        let pointsThisMatch = 0;
         if (localGoals > visitorGoals) {
           if (isLocal) {
             stats.won++;
             stats.points += 3;
+            pointsThisMatch = 3;
           } else {
             stats.lost++;
+            pointsThisMatch = 0;
           }
         } else if (localGoals < visitorGoals) {
           if (isLocal) {
             stats.lost++;
+            pointsThisMatch = 0;
           } else {
             stats.won++;
             stats.points += 3;
+            pointsThisMatch = 3;
           }
         } else {
           stats.drawn++;
           stats.points += 1;
+          pointsThisMatch = 1;
         }
+
+        console.log(`  Partido ${index + 1}: ${teamName} (${isLocal ? 'Local' : 'Visitante'}) ${isLocal ? localGoals + '-' + visitorGoals : visitorGoals + '-' + localGoals} vs ${oppositeTeamName} → +${pointsThisMatch} puntos`);
       });
+
+      console.log(`📈 Total: ${stats.points} puntos, ${stats.won}V-${stats.drawn}E-${stats.lost}D, GF:${stats.goalsFor} GC:${stats.goalsAgainst}`);
+      console.log(`===================================\n`);
 
       return stats;
     })
