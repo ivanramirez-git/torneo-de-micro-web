@@ -5,6 +5,24 @@
       <Button label="Programar Partido" icon="pi pi-plus" @click="openDialog()" class="p-button-primary" />
     </div>
 
+    <!-- Filtro de Torneos -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex items-center gap-4">
+        <label for="tournamentFilter" class="font-bold">Filtrar por Torneo:</label>
+        <Dropdown 
+          id="tournamentFilter"
+          v-model="selectedTournament" 
+          :options="tournaments" 
+          optionLabel="nombre" 
+          optionValue="id"
+          placeholder="Todos los torneos"
+          class="w-full md:w-64"
+          @change="onTournamentChange"
+          showClear
+        />
+      </div>
+    </div>
+
     <div class="bg-white rounded-lg shadow p-6">
       <DataTable :value="matches" :loading="loading" dataKey="id" paginator :rows="10"
         :rowsPerPageOptions="[10, 20, 50]" filterDisplay="menu" :filters="filters" class="p-datatable-lg">
@@ -90,7 +108,7 @@
 
       <div class="p-field mt-4">
         <label for="grupoId" class="font-bold mb-2 block">Grupo</label>
-        <Dropdown id="grupoId" v-model="matchForm.grupoId" :options="groups" optionLabel="nombre" optionValue="id"
+        <Dropdown id="grupoId" v-model="matchForm.grupoId" :options="filteredGroups.length > 0 ? filteredGroups : groups" optionLabel="nombre" optionValue="id"
           placeholder="Seleccione grupo" class="w-full" required @change="loadGroupTeams" />
       </div>
 
@@ -170,11 +188,16 @@ const toast = useToast();
 
 // State
 const matches = ref<Match[]>([]);
+const allMatches = ref<Match[]>([]); // Para guardar todos los partidos sin filtrar
 const teams = ref<Team[]>([]);
 const groupTeams = ref<Team[]>([]);
 const groups = ref<Group[]>([]);
+const phases = ref<any[]>([]); // Para guardar las fases
 const venues = ref<Venue[]>([]);
 const players = ref<Player[]>([]);
+const tournaments = ref<any[]>([]);
+const filteredGroups = ref<Group[]>([]);
+const selectedTournament = ref<string>('');
 const loading = ref(true);
 const dialogVisible = ref(false);
 const editMode = ref(false);
@@ -211,6 +234,7 @@ const loadMatches = async () => {
         }
       }
     });
+    allMatches.value = response.data;
     matches.value = response.data;
   } catch (error) {
     console.error('Error loading matches:', error);
@@ -242,6 +266,7 @@ const loadGroups = async () => {
   try {
     const response = await api.get('/grupos');
     groups.value = response.data;
+    filteredGroups.value = response.data;
   } catch (error) {
     console.error('Error loading groups:', error);
     toast.add({
@@ -249,6 +274,60 @@ const loadGroups = async () => {
       summary: 'Error',
       detail: 'No se pudieron cargar los grupos'
     });
+  }
+};
+
+const loadPhasesData = async () => {
+  try {
+    const response = await api.get('/fase-torneos');
+    phases.value = response.data;
+  } catch (error) {
+    console.error('Error loading phases:', error);
+  }
+};
+
+const loadTournaments = async () => {
+  try {
+    const response = await api.get('/torneos', {
+      params: {
+        filter: {
+          order: 'createdAt DESC'
+        }
+      }
+    });
+    tournaments.value = response.data;
+  } catch (error) {
+    console.error('Error loading tournaments:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudieron cargar los torneos'
+    });
+  }
+};
+
+const onTournamentChange = () => {
+  if (!selectedTournament.value) {
+    // Si no hay torneo seleccionado, mostrar todos los partidos y grupos
+    matches.value = allMatches.value;
+    filteredGroups.value = groups.value;
+  } else {
+    // Filtrar grupos y partidos del torneo seleccionado
+    const phasesInTournament = phases.value.filter(
+      (p: any) => p.torneoId === selectedTournament.value
+    );
+    const phaseIds = phasesInTournament.map((p: any) => p.id);
+    
+    // Filtrar grupos
+    filteredGroups.value = groups.value.filter(g => 
+      phaseIds.includes(g.faseTorneoId)
+    );
+    
+    // Filtrar partidos
+    const groupIds = filteredGroups.value.map(g => g.id);
+    matches.value = allMatches.value.filter(m => 
+      groupIds.includes(m.grupoId)
+    );
   }
 };
 
@@ -504,6 +583,8 @@ onMounted(() => {
   loadMatches();
   loadTeams();
   loadGroups();
+  loadPhasesData();
+  loadTournaments();
   loadVenues();
   loadPlayers();
 });
