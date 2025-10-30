@@ -331,11 +331,11 @@ const loadData = async () => {
         params: {
           filter: {
             include: [
-              'grupo',
-              'lugar',
-              'estadisticasPartido',
-              'solicitudesTiempo',
-              'penales'
+              { relation: 'grupo' },
+              { relation: 'lugar' },
+              { relation: 'estadisticasPartido' },
+              { relation: 'solicitudesTiempo' },
+              { relation: 'penales' }
             ]
           }
         }
@@ -740,7 +740,7 @@ const getGroupStats = (groupId: string) => {
     .map(tg => tg.equipoId);
 
   const groupMatches = matches.value.filter(
-    m => m.grupoId === groupId && m.horaInicioPrimerTiempo
+    m => m.grupoId === groupId && (m.horaInicioPrimerTiempo || m.horaFinPartido)
   );
 
   // Precalcular puntos disciplinarios para todos los equipos
