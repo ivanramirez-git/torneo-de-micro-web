@@ -10,6 +10,21 @@
       />
     </div>
 
+    <!-- Filtro por Torneo -->
+    <div class="mb-4 flex items-center gap-3">
+      <label for="tournamentFilter" class="font-semibold">Filtrar por Torneo:</label>
+      <Dropdown
+        id="tournamentFilter"
+        v-model="selectedTournament"
+        :options="tournaments"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Todos los torneos"
+        @change="onTournamentChange"
+        class="w-64"
+      />
+    </div>
+
     <DataTable 
       :value="groups" 
       :loading="loading"
@@ -124,8 +139,18 @@
       modal
       maximizable
       style="width: 90vw"
+      :contentStyle="{ padding: '0' }"
     >
-      <div v-if="selectedGroup" class="p-4">
+      <div v-if="selectedGroup" class="p-6">
+        <!-- Título Equipos Disponibles -->
+        <div class="mb-4">
+          <h3 class="text-lg font-bold text-gray-800 mb-3">
+            <i class="pi pi-list mr-2"></i>Equipos Disponibles
+          </h3>
+          <p class="text-sm text-gray-600 mb-4">Selecciona los equipos que deseas agregar al grupo</p>
+        </div>
+
+        <!-- Tabla de Equipos Disponibles -->
         <DataTable
           :value="availableTeams"
           v-model:selection="selectedTeams"
@@ -133,65 +158,143 @@
           :rows="10"
           paginator
           selectionMode="multiple"
-          class="mb-4"
+          :rowsPerPageOptions="[10, 20, 50]"
+          class="mb-6 p-datatable-striped"
+          responsiveLayout="scroll"
+          :globalFilterFields="['nombre']"
         >
+          <template #header>
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-semibold">{{ availableTeams.length }} equipos disponibles</span>
+            </div>
+          </template>
+
           <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-          <Column field="nombre" header="Nombre" sortable></Column>
-          <Column field="color" header="Color">
+          
+          <Column field="nombre" header="Nombre" sortable>
             <template #body="slotProps">
-              <div class="flex items-center">
-                <div class="w-4 h-4 rounded-full mr-2" :style="{ backgroundColor: slotProps.data.color }"></div>
-                {{ slotProps.data.color }}
+              <span class="font-semibold text-gray-800">{{ slotProps.data.nombre }}</span>
+            </template>
+          </Column>
+          
+          <Column field="color" header="Color" style="width: 20%">
+            <template #body="slotProps">
+              <div class="flex items-center gap-2">
+                <div 
+                  class="w-6 h-6 rounded-full border border-gray-300 shadow-sm" 
+                  :style="{ backgroundColor: '#' + slotProps.data.color }"
+                  :title="slotProps.data.color"
+                ></div>
+                <span class="text-sm font-mono text-gray-600">#{{ slotProps.data.color }}</span>
               </div>
             </template>
           </Column>
+
+          <template #emptyMessage>
+            <div class="text-center py-8">
+              <i class="pi pi-inbox text-3xl text-gray-400 mb-2"></i>
+              <p class="text-gray-500">Todos los equipos han sido asignados a este grupo</p>
+            </div>
+          </template>
         </DataTable>
 
+        <!-- Divisor -->
         <Divider align="center">
-          <span class="text-sm">Equipos Asignados</span>
+          <div class="flex items-center gap-2">
+            <i class="pi pi-arrow-down text-sm text-gray-400"></i>
+            <span class="text-sm font-semibold text-gray-700">Equipos Asignados</span>
+            <i class="pi pi-arrow-down text-sm text-gray-400"></i>
+          </div>
         </Divider>
 
+        <!-- Título Equipos Asignados -->
+        <div class="mb-4">
+          <h3 class="text-lg font-bold text-gray-800 mb-3">
+            <i class="pi pi-check-circle mr-2 text-green-600"></i>Equipos Asignados
+          </h3>
+        </div>
+
+        <!-- Tabla de Equipos Asignados -->
         <DataTable
           :value="groupTeams"
           dataKey="id"
           :rows="10"
           paginator
+          :rowsPerPageOptions="[10, 20, 50]"
+          class="p-datatable-striped"
+          responsiveLayout="scroll"
         >
-          <Column field="nombre" header="Nombre" sortable></Column>
-          <Column field="color" header="Color">
+          <template #header>
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-semibold">{{ groupTeams.length }} equipos asignados</span>
+            </div>
+          </template>
+
+          <Column field="nombre" header="Nombre" sortable>
             <template #body="slotProps">
-              <div class="flex items-center">
-                <div class="w-4 h-4 rounded-full mr-2" :style="{ backgroundColor: slotProps.data.color }"></div>
-                {{ slotProps.data.color }}
+              <span class="font-semibold text-gray-800">{{ slotProps.data.nombre }}</span>
+            </template>
+          </Column>
+          
+          <Column field="color" header="Color" style="width: 20%">
+            <template #body="slotProps">
+              <div class="flex items-center gap-2">
+                <div 
+                  class="w-6 h-6 rounded-full border border-gray-300 shadow-sm" 
+                  :style="{ backgroundColor: '#' + slotProps.data.color }"
+                  :title="slotProps.data.color"
+                ></div>
+                <span class="text-sm font-mono text-gray-600">#{{ slotProps.data.color }}</span>
               </div>
             </template>
           </Column>
-          <Column header="Acciones" style="width: 8rem">
+          
+          <Column header="Acciones" style="width: 10%">
             <template #body="slotProps">
               <Button
                 icon="pi pi-trash"
                 @click="removeTeamFromGroup(slotProps.data)"
                 class="p-button-text p-button-danger p-button-sm"
+                title="Eliminar equipo"
               />
             </template>
           </Column>
+
+          <template #emptyMessage>
+            <div class="text-center py-8">
+              <i class="pi pi-inbox text-3xl text-gray-400 mb-2"></i>
+              <p class="text-gray-500">No hay equipos asignados a este grupo</p>
+            </div>
+          </template>
         </DataTable>
       </div>
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <Button 
-            label="Cerrar" 
-            icon="pi pi-times" 
-            @click="teamsDialogVisible = false" 
-            class="p-button-text"
-          />
-          <Button 
-            label="Agregar Seleccionados" 
-            icon="pi pi-plus" 
-            @click="addTeamsToGroup" 
-            class="p-button-primary"
-            :disabled="!selectedTeams.length"
-          />
+        <div class="flex justify-between items-center bg-gray-50 -mx-6 -mb-6 px-6 py-4 border-t border-gray-200">
+          <div class="text-sm text-gray-600">
+            <span v-if="selectedTeams.length > 0" class="font-semibold text-blue-600">
+              {{ selectedTeams.length }} equipo(s) seleccionado(s)
+            </span>
+            <span v-else class="text-gray-500">
+              Selecciona equipos para agregarlos
+            </span>
+          </div>
+          <div class="flex justify-end gap-3">
+            <Button 
+              label="Cerrar" 
+              icon="pi pi-times" 
+              @click="teamsDialogVisible = false" 
+              class="p-button-outlined"
+              severity="secondary"
+            />
+            <Button 
+              label="Agregar Seleccionados" 
+              icon="pi pi-plus" 
+              @click="addTeamsToGroup" 
+              class="p-button-primary"
+              :disabled="!selectedTeams.length"
+              :loading="false"
+            />
+          </div>
         </div>
       </template>
     </Dialog>
@@ -224,6 +327,9 @@ const toast = useToast();
 
 // State
 const groups = ref([]);
+const allGroups = ref([]);
+const tournaments = ref([]);
+const phases = ref([]);
 const tournamentPhases = ref([]);
 const loading = ref(true);
 const dialogVisible = ref(false);
@@ -233,6 +339,7 @@ const selectedGroup = ref(null);
 const availableTeams = ref([]);
 const groupTeams = ref([]);
 const selectedTeams = ref([]);
+const selectedTournament = ref('');
 
 const filters = ref({
   nombre: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -249,6 +356,7 @@ const loadGroups = async () => {
   try {
     loading.value = true;
     const response = await api.get('/grupos');
+    allGroups.value = response.data;
     groups.value = response.data;
   } catch (error) {
     console.error('Error loading groups:', error);
@@ -259,6 +367,50 @@ const loadGroups = async () => {
     });
   } finally {
     loading.value = false;
+  }
+};
+
+const loadTournaments = async () => {
+  try {
+    const response = await api.get('/torneos');
+    tournaments.value = response.data;
+  } catch (error) {
+    console.error('Error loading tournaments:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudieron cargar los torneos'
+    });
+  }
+};
+
+const loadPhasesData = async () => {
+  try {
+    const response = await api.get('/fase-torneos');
+    phases.value = response.data;
+  } catch (error) {
+    console.error('Error loading phases:', error);
+  }
+};
+
+const onTournamentChange = () => {
+  if (!selectedTournament.value) {
+    groups.value = allGroups.value;
+  } else {
+    // Get phases for selected tournament
+    const phasesInTournament = phases.value.filter((p: any) => p.torneoId === selectedTournament.value);
+    const phaseIds = phasesInTournament.map((p: any) => p.id);
+    
+    console.log('Selected Tournament:', selectedTournament.value);
+    console.log('Phases in tournament:', phasesInTournament);
+    console.log('Phase IDs:', phaseIds);
+    console.log('All groups:', allGroups.value);
+    
+    // Filter groups by phase IDs
+    const filtered = allGroups.value.filter((g: any) => phaseIds.includes(g.faseTorneoId));
+    console.log('Filtered groups:', filtered);
+    
+    groups.value = filtered;
   }
 };
 
@@ -376,14 +528,47 @@ const loadTeamsForGroup = async () => {
   if (!selectedGroup.value) return;
   
   try {
-    const [allTeamsResponse, groupTeamsResponse] = await Promise.all([
-      api.get('/equipos'),
-      api.get(`/grupos/${selectedGroup.value.id}/equipo-grupos`)
-    ]);
+    // Obtener la fase del grupo para filtrar por torneo
+    const phase = tournamentPhases.value.find((p: any) => p.id === (selectedGroup.value as any).faseTorneoId);
+    const tournamentId = phase?.torneoId;
     
-    groupTeams.value = groupTeamsResponse.data;
-    const groupTeamIds = new Set(groupTeams.value.map(t => t.id));
-    availableTeams.value = allTeamsResponse.data.filter(t => !groupTeamIds.has(t.id));
+    // Obtener todos los equipos del torneo
+    let allTeams = [];
+    if (tournamentId) {
+      // Obtener todos los equipos y filtrar por los que pertenecen a este torneo
+      const allTeamsResponse = await api.get('/equipos');
+      // Obtener equipos-torneo para saber cuáles pertenecen a este torneo
+      const tournamentTeamsResponse = await api.get(`/torneos/${tournamentId}/equipos`).catch(() => ({ data: [] }));
+      const tournamentTeamIds = new Set((tournamentTeamsResponse.data as any[]).map((t: any) => t.id));
+      
+      // Si hay equipos del torneo, usarlos; si no, usar todos
+      allTeams = tournamentTeamIds.size > 0 
+        ? (allTeamsResponse.data as any[]).filter((t: any) => tournamentTeamIds.has(t.id))
+        : allTeamsResponse.data;
+    } else {
+      const allTeamsResponse = await api.get('/equipos');
+      allTeams = allTeamsResponse.data;
+    }
+    
+    // Obtener equipos asignados al grupo (solo IDs)
+    const groupTeamsResponse = await api.get(`/grupos/${(selectedGroup.value as any).id}/equipo-grupos`);
+    // IMPORTANTE: El API devuelve {id, grupoId, equipoId, ...}
+    // 'id' es el ID de la relación equipo-grupo
+    // 'equipoId' es el ID del equipo real
+    const groupTeamIds = new Set((groupTeamsResponse.data as any[]).map((t: any) => t.equipoId || t.id));
+    
+    // Hacer JOIN manual: obtener datos completos de equipos asignados
+    const completeGroupTeams = (allTeams as any[]).filter((t: any) => groupTeamIds.has(t.id));
+    (groupTeams as any).value = completeGroupTeams;
+    
+    // Filtrar equipos disponibles (todos del torneo menos los asignados)
+    (availableTeams as any).value = (allTeams as any[]).filter((t: any) => !groupTeamIds.has(t.id));
+    
+    console.log('Torneo ID:', tournamentId);
+    console.log('Equipos del torneo:', allTeams.length);
+    console.log('Equipos asignados:', groupTeams.value.length);
+    console.log('Equipos disponibles:', (availableTeams as any).value.length);
+    console.log('Datos de equipos asignados:', groupTeams.value);
   } catch (error) {
     console.error('Error loading teams:', error);
     toast.add({
@@ -447,5 +632,150 @@ const removeTeamFromGroup = async (team) => {
 onMounted(() => {
   loadGroups();
   loadTournamentPhases();
+  loadTournaments();
+  loadPhasesData();
 });
 </script>
+
+<style scoped>
+/* Estilos para las tablas dentro del modal de equipos */
+:deep(.p-datatable) {
+  font-size: 0.95rem;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 0.75rem;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+  padding: 0.75rem;
+  color: #4b5563;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background-color: #f9fafb;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr.p-highlight > td) {
+  color: #1e40af;
+}
+
+/* Estilos para checkboxes */
+:deep(.p-checkbox .p-checkbox-box) {
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+}
+
+:deep(.p-checkbox .p-checkbox-box.p-highlight) {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Estilos para paginación */
+:deep(.p-paginator) {
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.75rem;
+}
+
+:deep(.p-paginator .p-paginator-current) {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Estilos para divider */
+:deep(.p-divider) {
+  margin: 1.5rem 0;
+  border-color: #e5e7eb;
+}
+
+:deep(.p-divider .p-divider-content) {
+  background-color: white;
+  padding: 0 1rem;
+}
+
+/* Estilos para mensaje vacío */
+:deep(.p-datatable .p-datatable-emptymessage > tr > td) {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+}
+
+/* Estilos para botones en modal */
+:deep(.p-button) {
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+:deep(.p-button-primary) {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+:deep(.p-button-primary:hover:not(:disabled)) {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
+}
+
+:deep(.p-button-primary:disabled) {
+  background-color: #d1d5db;
+  border-color: #d1d5db;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+:deep(.p-button-outlined) {
+  border: 2px solid #d1d5db;
+  color: #4b5563;
+}
+
+:deep(.p-button-outlined:hover:not(:disabled)) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Estilos para header del modal */
+:deep(.p-dialog .p-dialog-header) {
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 1.25rem 1.5rem;
+}
+
+:deep(.p-dialog .p-dialog-header .p-dialog-title) {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.125rem;
+}
+
+/* Estilos para contenido del modal */
+:deep(.p-dialog .p-dialog-content) {
+  padding: 1.5rem;
+  background-color: white;
+}
+
+/* Tooltip */
+:deep(.p-tooltip) {
+  font-size: 0.875rem;
+}
+
+:deep(.p-tooltip.p-tooltip-top .p-tooltip-text) {
+  background-color: #1f2937;
+  color: white;
+  border-radius: 4px;
+}
+</style>
