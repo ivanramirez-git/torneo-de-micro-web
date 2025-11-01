@@ -9,6 +9,11 @@ const routes = [
     meta: { public: true }
   },
   {
+    path: '/torneo/:id',
+    component: () => import('../views/TournamentDetail.vue'),
+    meta: { public: true }
+  },
+  {
     path: '/login',
     component: () => import('../views/Login.vue'),
     meta: { public: true }
