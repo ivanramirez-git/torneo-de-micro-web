@@ -26,9 +26,12 @@
           <p class="text-lg sm:text-xl max-w-3xl mx-auto text-blue-50 drop-shadow mb-8">
             Un espacio que reúne a nuestra comunidad en torno al deporte, la amistad y la alegría del fin de año
           </p>
-          <div class="inline-block bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg animate-pulse">
+          <button 
+            @click="scrollToTournaments"
+            class="inline-block bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg animate-pulse hover:bg-green-600 transition-colors cursor-pointer"
+          >
             🏆 ¡Torneo 2025 en Curso!
-          </div>
+          </button>
         </div>
       </div>
     </div>
@@ -113,7 +116,7 @@
       </div>
 
       <!-- Tournaments List -->
-      <div v-else class="mb-16">
+      <div v-else class="mb-16" id="tournaments-section">
         <h2 class="text-3xl font-bold text-gray-900 mb-2 text-center">🏆 Torneos Disponibles</h2>
         <p class="text-center text-gray-600 mb-8">Selecciona un torneo para ver estadísticas, clasificaciones y resultados</p>
         
@@ -259,6 +262,16 @@ const formatDate = (date: string): string => {
     month: 'long',
     day: 'numeric'
   });
+};
+
+const scrollToTournaments = () => {
+  const tournamentsSection = document.getElementById('tournaments-section');
+  if (tournamentsSection) {
+    tournamentsSection.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
 };
 
 onMounted(() => {
