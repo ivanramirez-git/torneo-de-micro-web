@@ -154,6 +154,54 @@
         </div>
       </div>
 
+      <!-- Action Video Section -->
+      <div class="mb-16 relative overflow-hidden rounded-3xl shadow-2xl">
+        <!-- Video Background with Overlay -->
+        <div class="relative">
+          <video 
+            autoplay 
+            loop 
+            muted 
+            playsinline
+            class="w-full h-[500px] object-cover"
+          >
+            <source src="/fotos/2024/regate-equipo-benfica-omar-david-torneo-masculino-2024.mp4" type="video/mp4">
+          </video>
+          
+          <!-- Gradient Overlay -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          
+          <!-- Content Overlay -->
+          <div class="absolute inset-0 flex items-end">
+            <div class="p-8 sm:p-12 w-full">
+              <div class="max-w-3xl">
+                <span class="inline-block bg-red-600 text-white px-4 py-2 rounded-full text-sm font-bold mb-4 animate-pulse">
+                  🔥 ACCIÓN EN VIVO
+                </span>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
+                  Vive la Emoción del Fútbol
+                </h2>
+                <p class="text-lg sm:text-xl text-white/90 mb-6 drop-shadow">
+                  Cada jugada cuenta, cada momento es único. Omar David del Equipo Benfica demostrando su habilidad 
+                  en el Torneo Masculino 2024. ⚡
+                </p>
+                <div class="flex flex-wrap gap-4">
+                  <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                    <span class="text-white font-semibold">🎥 Momentos Destacados</span>
+                  </div>
+                  <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                    <span class="text-white font-semibold">⚽ Jugadas Épicas</span>
+                  </div>
+                  <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+                    <span class="text-white font-semibold">🏆 Talento Local</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Community Impact Section -->
       <div class="mb-16 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 sm:p-12 text-white shadow-xl">
         <div class="text-center mb-8">
