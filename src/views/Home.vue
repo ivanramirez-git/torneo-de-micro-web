@@ -182,8 +182,7 @@
                   Vive la Emoción del Fútbol
                 </h2>
                 <p class="text-lg sm:text-xl text-white/90 mb-6 drop-shadow">
-                  Cada jugada cuenta, cada momento es único. Omar David del Equipo Benfica demostrando su habilidad 
-                  en el Torneo Masculino 2024. ⚡
+                  Cada jugada cuenta, cada momento es único. ⚡
                 </p>
                 <div class="flex flex-wrap gap-4">
                   <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
