@@ -720,7 +720,9 @@ const getGroupStats = (groupId: string) => {
         if (localGoals > visitorGoals) {
           if (isLocal) {
             stats.won++;
-            stats.points += 3;
+            if (!match.equipoLocalSancionado) {
+              stats.points += 3;
+            }
           } else {
             stats.lost++;
           }
@@ -729,11 +731,21 @@ const getGroupStats = (groupId: string) => {
             stats.lost++;
           } else {
             stats.won++;
-            stats.points += 3;
+            if (!match.equipoVisitanteSancionado) {
+              stats.points += 3;
+            }
           }
         } else {
           stats.drawn++;
-          stats.points += 1;
+          if (isLocal) {
+            if (!match.equipoLocalSancionado) {
+              stats.points += 1;
+            }
+          } else {
+            if (!match.equipoVisitanteSancionado) {
+              stats.points += 1;
+            }
+          }
         }
       });
 

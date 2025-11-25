@@ -59,6 +59,31 @@
                     </div>
                 </div>
 
+                <!-- Sanctions Toggle -->
+                <div v-if="match" class="mt-6 border-t pt-4 text-center">
+                    <button @click="showSanctions = !showSanctions"
+                        class="text-sm text-gray-500 hover:text-gray-700 underline mb-4">
+                        {{ showSanctions ? 'Ocultar Sanciones' : 'Gestionar Sanciones' }}
+                    </button>
+
+                    <div v-if="showSanctions" class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300">
+                        <div class="flex items-center justify-center p-2 bg-gray-50 rounded border border-gray-200">
+                            <Checkbox v-model="match.equipoLocalSancionado" :binary="true" @change="updateSanctions"
+                                inputId="sanction-local" />
+                            <label for="sanction-local" class="ml-2 text-sm cursor-pointer select-none text-gray-700">
+                                Sancionar {{ getTeam(match?.equipoLocalId)?.nombre }}
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-center p-2 bg-gray-50 rounded border border-gray-200">
+                            <Checkbox v-model="match.equipoVisitanteSancionado" :binary="true" @change="updateSanctions"
+                                inputId="sanction-visitor" />
+                            <label for="sanction-visitor" class="ml-2 text-sm cursor-pointer select-none text-gray-700">
+                                Sancionar {{ getTeam(match?.equipoVisitanteId)?.nombre }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Teams -->
@@ -104,6 +129,7 @@ import api from '../../stores/api';
 // Components
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
+import Checkbox from 'primevue/checkbox';
 import Toast from 'primevue/toast';
 import MatchHeader from '../../components/matches/MatchHeader.vue';
 import MatchTimer from '../../components/matches/MatchTimer.vue';
@@ -126,6 +152,7 @@ const timeRequests = ref<SolicitudTiempo[]>([]);
 const loading = ref(true);
 const selectedMvpEquipoLocal = ref<string | null>(null);
 const selectedMvpEquipoVisitante = ref<string | null>(null);
+const showSanctions = ref(false);
 
 // Dialog states
 const goalDialog = ref(false);
@@ -420,6 +447,29 @@ const updateMvp = async () => {
             summary: 'Error',
             detail: 'No se pudo actualizar el MVP'
         });
+    }
+};
+
+const updateSanctions = async () => {
+    if (!match.value) return;
+    try {
+        await api.patch(`/partidos/${match.value.id}`, {
+            equipoLocalSancionado: match.value.equipoLocalSancionado,
+            equipoVisitanteSancionado: match.value.equipoVisitanteSancionado
+        });
+        toast.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Sanciones actualizadas'
+        });
+    } catch (error) {
+        console.error('Error updating sanctions:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudieron actualizar las sanciones'
+        });
+        await loadMatch();
     }
 };
 

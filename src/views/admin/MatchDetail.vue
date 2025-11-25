@@ -109,6 +109,27 @@
                 class="w-full" @click="showPenaltyDialog" />
             </div>
           </div>
+
+          <!-- Sanctions -->
+          <div v-if="match" class="col-span-1 md:col-span-2 border-t pt-4 mt-2">
+            <h3 class="text-lg font-medium text-red-600 mb-3">Sanciones</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-center p-3 bg-red-50 rounded-lg border border-red-100">
+                <Checkbox v-model="match.equipoLocalSancionado" :binary="true" @change="updateSanctions" inputId="sanction-local" />
+                <label for="sanction-local" class="ml-2 cursor-pointer select-none">
+                  Sancionar a <span class="font-semibold">{{ getTeamName(match?.equipoLocalId) }}</span>
+                  <span class="block text-xs text-gray-500 mt-1">No sumará puntos en este partido</span>
+                </label>
+              </div>
+              <div class="flex items-center p-3 bg-red-50 rounded-lg border border-red-100">
+                <Checkbox v-model="match.equipoVisitanteSancionado" :binary="true" @change="updateSanctions" inputId="sanction-visitor" />
+                <label for="sanction-visitor" class="ml-2 cursor-pointer select-none">
+                  Sancionar a <span class="font-semibold">{{ getTeamName(match?.equipoVisitanteId) }}</span>
+                  <span class="block text-xs text-gray-500 mt-1">No sumará puntos en este partido</span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -281,6 +302,7 @@ import StatusBadge from '../../components/matches/StatusBadge.vue';
 
 // Components
 import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
 import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import InputNumber from 'primevue/inputnumber';
@@ -797,6 +819,29 @@ const savePenalty = async () => {
       summary: 'Error',
       detail: 'No se pudo registrar el penal'
     });
+  }
+};
+
+const updateSanctions = async () => {
+  if (!match.value) return;
+  try {
+    await api.patch(`/partidos/${match.value.id}`, {
+      equipoLocalSancionado: match.value.equipoLocalSancionado,
+      equipoVisitanteSancionado: match.value.equipoVisitanteSancionado
+    });
+    toast.add({
+      severity: 'success',
+      summary: 'Éxito',
+      detail: 'Sanciones actualizadas'
+    });
+  } catch (error) {
+    console.error('Error updating sanctions:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No se pudieron actualizar las sanciones'
+    });
+    await loadMatch();
   }
 };
 

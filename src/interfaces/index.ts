@@ -70,6 +70,8 @@ export interface Match extends BaseEntity {
   horaFinPartido?: Date;
   equipoLocalId: string;
   equipoVisitanteId: string;
+  equipoLocalSancionado?: boolean;
+  equipoVisitanteSancionado?: boolean;
   grupoId: string;
   lugarId: string;
   lugar?: Venue;
