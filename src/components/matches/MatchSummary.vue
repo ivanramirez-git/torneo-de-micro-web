@@ -2,8 +2,8 @@
     <div class="mt-8 bg-white rounded-lg shadow-lg p-6 mb-6">
         <h3 class="text-xl font-bold mb-4">📊 Resumen del Partido</h3>
         <div class="text-center text-2xl font-bold">
-            {{ getTeamName(match?.equipoLocalId) }} {{ getTeamStats(match?.equipoLocalId)?.goles || 0 }} -
-            {{ getTeamStats(match?.equipoVisitanteId)?.goles || 0 }} {{ getTeamName(match?.equipoVisitanteId) }}
+            {{ getTeamName(match?.equipoLocalId) }} {{ match?.equipoLocalSancionado ? '❌' : (getTeamStats(match?.equipoLocalId)?.goles || 0) }} -
+            {{ match?.equipoVisitanteSancionado ? '❌' : (getTeamStats(match?.equipoVisitanteId)?.goles || 0) }} {{ getTeamName(match?.equipoVisitanteId) }}
         </div>
     </div>
 </template>

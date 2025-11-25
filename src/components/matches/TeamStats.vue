@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="text-4xl font-bold">
-                {{ totalTeamGoals }}
+                {{ isSanctioned ? '❌' : totalTeamGoals }}
             </div>
         </div>
 
@@ -140,5 +140,16 @@ const totalTeamGoals = computed(() => {
     return props.match.estadisticasPartido
         .filter((stat) => stat.equipoId === props.team?.id)
         .reduce((acc, stat) => acc + (stat.goles || 0), 0);
+});
+
+const isSanctioned = computed(() => {
+    if (!props.match || !props.team) return false;
+    if (props.team.id === props.match.equipoLocalId) {
+        return props.match.equipoLocalSancionado;
+    }
+    if (props.team.id === props.match.equipoVisitanteId) {
+        return props.match.equipoVisitanteSancionado;
+    }
+    return false;
 });
 </script>
