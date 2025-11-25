@@ -553,7 +553,10 @@ const getMatchScore = (match: any): string => {
   const localGoals = localStats?.reduce((sum: number, stat: any) => sum + (stat.goles || 0), 0) || 0;
   const visitorGoals = visitorStats?.reduce((sum: number, stat: any) => sum + (stat.goles || 0), 0) || 0;
 
-  return `${localGoals} - ${visitorGoals}`;
+  const localScore = match.equipoLocalSancionado ? '❌' : localGoals;
+  const visitorScore = match.equipoVisitanteSancionado ? '❌' : visitorGoals;
+
+  return `${localScore} - ${visitorScore}`;
 };
 
 const getMatchStatus = (match: Match): string => {
