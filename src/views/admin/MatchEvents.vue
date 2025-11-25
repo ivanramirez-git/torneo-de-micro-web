@@ -36,6 +36,15 @@
                     <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinPartido" label="Finalizar Partido"
                         severity="danger" @click="endMatch"
                         :disabled="!match?.mvpEquipoLocalId || !match?.mvpEquipoVisitanteId" />
+                    
+                    <!-- Edit Mode Button -->
+                    <Button v-if="match?.horaFinPartido" 
+                        :label="isEditing ? 'Terminar Edición' : 'Habilitar Edición'" 
+                        :severity="isEditing ? 'success' : 'info'" 
+                        :icon="isEditing ? 'pi pi-check' : 'pi pi-pencil'"
+                        @click="isEditing = !isEditing" 
+                        class="ml-2" />
+
                     <MatchTimer :startTime="getCurrentPeriodStartTime" :period="currentPeriod"
                         :isActive="isMatchActive" />
                 </div>
@@ -153,6 +162,7 @@ const loading = ref(true);
 const selectedMvpEquipoLocal = ref<string | null>(null);
 const selectedMvpEquipoVisitante = ref<string | null>(null);
 const showSanctions = ref(false);
+const isEditing = ref(false);
 
 // Dialog states
 const goalDialog = ref(false);
@@ -164,6 +174,7 @@ const selectedCardType = ref<'yellow' | 'blue' | 'red'>('yellow');
 
 // Computed
 const isMatchActive = computed(() => {
+    if (isEditing.value) return true;
     return match.value?.horaInicioPrimerTiempo && !match.value?.horaFinPartido;
 });
 

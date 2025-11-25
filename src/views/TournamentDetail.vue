@@ -364,6 +364,13 @@ const topScorers = computed(() => {
   const playerStats: { [key: string]: { id: string; equipoId: string; goles: number } } = {};
 
   relevantStats.forEach((stat: any) => {
+    // Check for sanctions
+    const match = matches.value.find((m: any) => m.id === stat.partidoId);
+    if (match) {
+      if (match.equipoLocalId === stat.equipoId && match.equipoLocalSancionado) return;
+      if (match.equipoVisitanteId === stat.equipoId && match.equipoVisitanteSancionado) return;
+    }
+
     if (!playerStats[stat.jugadorId]) {
       playerStats[stat.jugadorId] = {
         id: stat.jugadorId,
@@ -712,12 +719,16 @@ const getGroupStats = (groupId: string) => {
             ?.filter((s: any) => s.equipoId === match.equipoVisitanteId)
             .reduce((sum: number, s: any) => sum + (s.goles || 0), 0) || 0;
 
+        // Apply sanctions to goals for statistics
+        const effectiveLocalGoals = match.equipoLocalSancionado ? 0 : localGoals;
+        const effectiveVisitorGoals = match.equipoVisitanteSancionado ? 0 : visitorGoals;
+
         if (isLocal) {
-          stats.goalsFor += localGoals;
-          stats.goalsAgainst += visitorGoals;
+          stats.goalsFor += effectiveLocalGoals;
+          stats.goalsAgainst += effectiveVisitorGoals;
         } else {
-          stats.goalsFor += visitorGoals;
-          stats.goalsAgainst += localGoals;
+          stats.goalsFor += effectiveVisitorGoals;
+          stats.goalsAgainst += effectiveLocalGoals;
         }
 
         if (localGoals > visitorGoals) {
