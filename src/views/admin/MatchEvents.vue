@@ -357,14 +357,16 @@ const requestTime = async (team: Team) => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Tiempo solicitado correctamente'
+            detail: 'Tiempo solicitado correctamente',
+            life: 3000
         });
     } catch (error) {
         console.error('Error requesting time:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo solicitar el tiempo'
+            detail: 'No se pudo solicitar el tiempo',
+            life: 0
         });
     }
 };
@@ -380,14 +382,16 @@ const addGoal = async ({ player, team }) => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Gol registrado'
+            detail: 'Gol registrado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error adding goal:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo registrar el gol'
+            detail: 'No se pudo registrar el gol',
+            life: 0
         });
     }
 };
@@ -403,14 +407,16 @@ const addFoul = async ({ player, team }) => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Falta registrada'
+            detail: 'Falta registrada',
+            life: 3000
         });
     } catch (error) {
         console.error('Error adding foul:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo registrar la falta'
+            detail: 'No se pudo registrar la falta',
+            life: 0
         });
     }
 };
@@ -440,14 +446,16 @@ const saveCard = async ({ player, team, type }) => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Tarjeta registrada'
+            detail: 'Tarjeta registrada',
+            life: 3000
         });
     } catch (error) {
         console.error('Error saving card:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo registrar la tarjeta'
+            detail: 'No se pudo registrar la tarjeta',
+            life: 0
         });
     }
 };
@@ -464,14 +472,16 @@ const updateMvp = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'MVP actualizado'
+            detail: 'MVP actualizado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error updating MVP:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo actualizar el MVP'
+            detail: 'No se pudo actualizar el MVP',
+            life: 0
         });
     }
 };
@@ -486,14 +496,16 @@ const updateSanctions = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Sanciones actualizadas'
+            detail: 'Sanciones actualizadas',
+            life: 3000
         });
     } catch (error) {
         console.error('Error updating sanctions:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudieron actualizar las sanciones'
+            detail: 'No se pudieron actualizar las sanciones',
+            life: 0
         });
         await loadMatch();
     }
@@ -508,14 +520,16 @@ const startMatch = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Partido iniciado'
+            detail: 'Partido iniciado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error starting match:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo iniciar el partido'
+            detail: 'No se pudo iniciar el partido',
+            life: 0
         });
     }
 };
@@ -529,14 +543,16 @@ const endFirstHalf = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Primer tiempo finalizado'
+            detail: 'Primer tiempo finalizado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error ending first half:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo finalizar el primer tiempo'
+            detail: 'No se pudo finalizar el primer tiempo',
+            life: 0
         });
     }
 };
@@ -550,14 +566,16 @@ const startSecondHalf = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Segundo tiempo iniciado'
+            detail: 'Segundo tiempo iniciado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error starting second half:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo iniciar el segundo tiempo'
+            detail: 'No se pudo iniciar el segundo tiempo',
+            life: 0
         });
     }
 };
@@ -571,14 +589,16 @@ const endSecondHalf = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Segundo tiempo finalizado'
+            detail: 'Segundo tiempo finalizado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error ending second half:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo finalizar el segundo tiempo'
+            detail: 'No se pudo finalizar el segundo tiempo',
+            life: 0
         });
     }
 };
@@ -592,14 +612,16 @@ const startExtraTime1 = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Tiempo extra 1 iniciado'
+            detail: 'Tiempo extra 1 iniciado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error starting extra time 1:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo iniciar el tiempo extra 1'
+            detail: 'No se pudo iniciar el tiempo extra 1',
+            life: 0
         });
     }
 };
@@ -613,14 +635,16 @@ const endExtraTime1 = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Tiempo extra 1 finalizado'
+            detail: 'Tiempo extra 1 finalizado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error ending extra time 1:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo finalizar el tiempo extra 1'
+            detail: 'No se pudo finalizar el tiempo extra 1',
+            life: 0
         });
     }
 };
@@ -634,14 +658,16 @@ const startExtraTime2 = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Tiempo extra 2 iniciado'
+            detail: 'Tiempo extra 2 iniciado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error starting extra time 2:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo iniciar el tiempo extra 2'
+            detail: 'No se pudo iniciar el tiempo extra 2',
+            life: 0
         });
     }
 };
@@ -655,14 +681,16 @@ const endExtraTime2 = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Tiempo extra 2 finalizado'
+            detail: 'Tiempo extra 2 finalizado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error ending extra time 2:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo finalizar el tiempo extra 2'
+            detail: 'No se pudo finalizar el tiempo extra 2',
+            life: 0
         });
     }
 };
@@ -676,14 +704,16 @@ const startPenalties = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Penales iniciados'
+            detail: 'Penales iniciados',
+            life: 3000
         });
     } catch (error) {
         console.error('Error starting penalties:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudieron iniciar los penales'
+            detail: 'No se pudieron iniciar los penales',
+            life: 0
         });
     }
 };
@@ -697,14 +727,16 @@ const endPenalties = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Penales finalizados'
+            detail: 'Penales finalizados',
+            life: 3000
         });
     } catch (error) {
         console.error('Error ending penalties:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudieron finalizar los penales'
+            detail: 'No se pudieron finalizar los penales',
+            life: 0
         });
     }
 };
@@ -714,7 +746,8 @@ const endMatch = async () => {
         toast.add({
             severity: 'warn',
             summary: 'Advertencia',
-            detail: 'Debe seleccionar un MVP antes de finalizar el partido'
+            detail: 'Debe seleccionar un MVP antes de finalizar el partido',
+            life: 3000
         });
         return;
     }
@@ -738,14 +771,16 @@ const endMatch = async () => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Partido finalizado'
+            detail: 'Partido finalizado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error ending match:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo finalizar el partido'
+            detail: 'No se pudo finalizar el partido',
+            life: 0
         });
     }
 };
@@ -761,14 +796,16 @@ const savePenalty = async ({ player, team, goal }) => {
         toast.add({
             severity: 'success',
             summary: 'Éxito',
-            detail: 'Penal registrado'
+            detail: 'Penal registrado',
+            life: 3000
         });
     } catch (error) {
         console.error('Error saving penalty:', error);
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'No se pudo registrar el penal'
+            detail: 'No se pudo registrar el penal',
+            life: 0
         });
     }
 };
