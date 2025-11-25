@@ -388,6 +388,7 @@ const loadMatch = async () => {
       params: {
         filter: {
           include: [
+            'grupo',
             'lugar',
             'estadisticasPartido',
             'solicitudesTiempo',
@@ -397,6 +398,15 @@ const loadMatch = async () => {
       }
     });
     match.value = response.data;
+
+    if (match.value?.grupo?.faseTorneoId) {
+      try {
+        const faseResponse = await api.get(`/fase-torneos/${match.value.grupo.faseTorneoId}`);
+        match.value.grupo.faseTorneo = faseResponse.data;
+      } catch (error) {
+        console.error('Error loading tournament phase:', error);
+      }
+    }
   } catch (error) {
     console.error('Error loading match:', error);
     toast.add({

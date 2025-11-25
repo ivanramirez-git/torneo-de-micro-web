@@ -20,19 +20,24 @@
                         label="Iniciar Segundo Tiempo" severity="success" @click="startSecondHalf" />
                     <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinSegundoTiempo"
                         label="Finalizar Segundo Tiempo" severity="warning" @click="endSecondHalf" />
-                    <Button
-                        v-if="match?.horaFinSegundoTiempo && !match?.horaInicioTiempoExtra1 && !match?.grupo?.faseTorneo?.permiteEmpates"
-                        label="Iniciar Tiempo Extra 1" severity="success" @click="startExtraTime1" />
-                    <Button v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1"
-                        label="Finalizar Tiempo Extra 1" severity="warning" @click="endExtraTime1" />
-                    <Button v-if="match?.horaFinTiempoExtra1 && !match?.horaInicioTiempoExtra2"
-                        label="Iniciar Tiempo Extra 2" severity="success" @click="startExtraTime2" />
-                    <Button v-if="match?.horaInicioTiempoExtra2 && !match?.horaFinTiempoExtra2"
-                        label="Finalizar Tiempo Extra 2" severity="warning" @click="endExtraTime2" />
-                    <Button v-if="match?.horaFinTiempoExtra2 && !match?.horaInicioPenales" label="Iniciar Penales"
-                        severity="success" @click="startPenalties" />
-                    <Button v-if="match?.horaInicioPenales && !match?.horaFinPenales" label="Finalizar Penales"
-                        severity="warning" @click="endPenalties" />
+                    
+                    <!-- Extra Time and Penalties Controls (Only for Playoffs) -->
+                    <template v-if="!match?.grupo?.faseTorneo?.permiteEmpates">
+                        <Button
+                            v-if="match?.horaFinSegundoTiempo && !match?.horaInicioTiempoExtra1"
+                            label="Iniciar Tiempo Extra 1" severity="success" @click="startExtraTime1" />
+                        <Button v-if="match?.horaInicioTiempoExtra1 && !match?.horaFinTiempoExtra1"
+                            label="Finalizar Tiempo Extra 1" severity="warning" @click="endExtraTime1" />
+                        <Button v-if="match?.horaFinTiempoExtra1 && !match?.horaInicioTiempoExtra2"
+                            label="Iniciar Tiempo Extra 2" severity="success" @click="startExtraTime2" />
+                        <Button v-if="match?.horaInicioTiempoExtra2 && !match?.horaFinTiempoExtra2"
+                            label="Finalizar Tiempo Extra 2" severity="warning" @click="endExtraTime2" />
+                        <Button v-if="match?.horaFinTiempoExtra2 && !match?.horaInicioPenales" label="Iniciar Penales"
+                            severity="success" @click="startPenalties" />
+                        <Button v-if="match?.horaInicioPenales && !match?.horaFinPenales" label="Finalizar Penales"
+                            severity="warning" @click="endPenalties" />
+                    </template>
+
                     <Button v-if="match?.horaInicioSegundoTiempo && !match?.horaFinPartido" label="Finalizar Partido"
                         severity="danger" @click="endMatch"
                         :disabled="!match?.mvpEquipoLocalId || !match?.mvpEquipoVisitanteId" />
@@ -235,6 +240,15 @@ const loadMatch = async () => {
             }
         });
         match.value = response.data;
+
+        if (match.value?.grupo?.faseTorneoId) {
+            try {
+                const faseResponse = await api.get(`/fase-torneos/${match.value.grupo.faseTorneoId}`);
+                match.value.grupo.faseTorneo = faseResponse.data;
+            } catch (error) {
+                console.error('Error loading tournament phase:', error);
+            }
+        }
         selectedMvpEquipoLocal.value = match.value?.mvpEquipoLocalId;
         selectedMvpEquipoVisitante.value = match.value?.mvpEquipoVisitanteId;
 
